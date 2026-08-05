@@ -1,0 +1,208 @@
+# Schedule I Control Center
+
+Unofficial, task-focused control center and modifier for **Schedule I**
+(Steam app `3164500`). It brings together live fair-market synchronization,
+customer affordability scaling, sell-value / deal-limit controls, and safe
+offline save tools in one window.
+
+**Version:** v0.4.0 (bridge v0.4.0, protocol v1)
+
+**Release ZIP password:** `INTEL DATABASE`
+
+---
+
+## What's in the package
+
+- `ScheduleIControlCenter.exe` - one-click launcher: finds the game, attaches
+  the runtime on confirmation, and opens the Control Center.
+- `ScheduleI-ControlCenter\dist\ScheduleIControlCenter.exe` - the Control
+  Center GUI.
+- `ScheduleI-ControlCenter\dist\ScheduleIControlCenter.Cli.exe` - offline CLI.
+- `Mods\ScheduleIControlBridge.dll` - the v0.4.0 in-game bridge mod.
+- `version.dll` + `MelonLoader\` - MelonLoader 0.7.3 runtime tree.
+- `UserData\Loader.cfg` - loader configuration.
+- `CHECKSUMS-SHA256.txt` - SHA-256 hashes of the key files.
+
+The package intentionally contains **no save files, backups, logs, or bridge
+settings profiles** - those stay on your machine.
+
+---
+
+## Requirements
+
+- 64-bit Windows
+- .NET Framework 4.8.1 (Control Center GUI and launcher)
+- x64 .NET 6.0.36 runtime (MelonLoader)
+- Schedule I `0.4.5f2`, Steam build `22829923` (for live mutation support)
+
+---
+
+## Quick start (one-click)
+
+1. Close Schedule I and the Control Center.
+2. Extract the release ZIP (password: `INTEL DATABASE`) anywhere, or copy the
+   whole `ScheduleI-Control-Center-v0.4.0` folder wherever you like.
+3. Run `ScheduleIControlCenter.exe` - the launcher next to this readme.
+4. The launcher searches for Schedule I (default Steam path first, then Steam
+   library folders, then a bounded system-wide search) and shows the folder it
+   found.
+5. Click **Attach and launch**. The runtime is copied into the game folder and
+   the Control Center starts automatically.
+
+The launcher never deletes files, needs no administrator rights, and does not
+touch saves, backups, or bridge settings. Files that are already present and
+identical are skipped; older versions are kept as `.bak-<timestamp>` next to
+the file before replacement. A small attach record is written to
+`ScheduleI-ControlCenter\InstallRecords`.
+
+If you only want to run the Control Center without re-attaching, click
+**Launch only**.
+
+---
+
+## Manual install
+
+1. Close Schedule I and the Control Center.
+2. Extract the folder's **contents** into the Schedule I installation root:
+
+   `C:\Program Files (x86)\Steam\steamapps\common\Schedule I`
+
+3. Allow the matching folders to merge.
+4. Start Schedule I, load a save, then run:
+
+   `ScheduleI-ControlCenter\dist\ScheduleIControlCenter.exe`
+
+The Control Center must stay below the game directory - it searches upward for
+`Schedule I.exe` and will not provide live/game-aware features otherwise.
+
+---
+
+## Using the Control Center
+
+The top bar shows the three readiness states: `GAME: RUNNING`,
+`BRIDGE: CONNECTED`, and `AUTHORITY: SOLO HOST`. Live mutation controls stay
+unavailable until all three are green.
+
+### Overview
+Plain-language game, bridge, save, and authority status plus the recommended
+next action.
+
+### Sell Values
+Separates the native `$9,999` maximum **total** used in counteroffers and
+handovers from the separate `$1..$999` product **unit-price** range. A custom
+total-deal maximum (`9999..999999`) can be previewed and applied, or restored
+to the native default. Unit-price changes are verified and saved through the
+live game.
+
+### Products
+Guided fair-market synchronization: selling price, current/planned fair-market
+value, customer value, and alignment. **Match selling price (recommended)**,
+an absolute multiplier, or double-click a **Planned fair value** cell for an
+exact value - then **Preview sync** and **Apply and verify**.
+
+### Customers
+Scoped weekly-spend controls (unlocked or all customers) using an
+original-value multiplier or per-customer manual ranges. The table exposes the
+derived per-order allowance and the roughly three-times hard offer ceiling
+before you apply.
+
+### Properties
+Acquire-only live vanilla ownership, with an offline fallback available only
+when the game is closed. Un-owning is intentionally unavailable.
+
+### Save Tools
+Full slot backup, all-JSON validation, and console enablement.
+
+### Help
+Searchable quick start, concepts, live/offline behavior, safety, persistence,
+multiplayer limits, troubleshooting, commands, and rollback.
+
+### Advanced
+Raw command output and the clearly warned sell-only offline editor.
+
+---
+
+## Why fair-market synchronization?
+
+Schedule I stores the selling price separately from
+`ProductDefinition.MarketValue`. Customers compare the offer price against
+market value, so raising only the selling price lowers their value proposition.
+The bridge patches the reviewed
+`ProductManager.CalculateProductValue(ProductDefinition,float)` path and stores
+absolute per-product factors in a bounded, save-scoped sidecar - never stacking
+multipliers across refreshes or restarts.
+
+Fair-market overrides are solo-host only because market value is local and not
+FishNet-replicated.
+
+## Why customer allowance controls?
+
+Customers have a native budget derived from their weekly-spend range,
+relationship interpolation, and rank multiplier. Counteroffer and
+offer-success calculations can hard-reject an asking price above roughly three
+times the per-order allowance. The bridge rescales only
+`CustomerData.GetAdjustedWeeklySpend(float)` from the original range to the
+configured range; preferences, relationship, addiction, order scheduling,
+product enjoyment, and randomness still apply. It raises the affordability
+envelope - it does not force a sale.
+
+## Sell Values: total cap vs unit price
+
+The `$9,999` maximum is the total entered in counteroffers and handovers. The
+`$1..$999` range is the unit price per product. They are independent controls;
+the Sell Values page keeps them clearly separated. A custom total is applied
+through four reviewed Harmony replacements
+(`CounterofferInterface.ChangePrice`, `.PriceSubmitted`, `.Send`, and
+`HandoverScreenPriceSelector.SetPrice`) and persists in a bridge-sidecar
+profile. The native `MaxPrice` static wrappers are intentionally untouched
+because the reviewed native methods inline their `$9,999` constants.
+
+---
+
+## Safety notes
+
+- Same-user, one-client Windows named pipe with bounded, versioned JSON.
+- No TCP/HTTP listener, remote access, arbitrary paths, reflection, eval, or
+  code execution.
+- Mutations require the exact reviewed build, a loaded save, solo-host
+  authority, and a known count of zero remote players.
+- Offline writes are refused while the game runs and create a full slot backup
+  before applying.
+- The bridge keeps Unity running while unfocused so requests complete; the
+  game simulation continues until Schedule I exits.
+- This is an unofficial fan tool. Use at your own risk; keep save backups.
+
+## Rollback
+
+- Close the game. Remove or rename `Mods\ScheduleIControlBridge.dll` to disable
+  the bridge; native values return on the next launch.
+- Remove or rename root `version.dll` to bypass MelonLoader entirely.
+- Saved unit-price or ownership changes are native save data and are reversed
+  through a reviewed live change or a save backup.
+
+---
+
+## Building from source
+
+This runtime package intentionally excludes source and build tools. The
+developer project (GUI/CLI source, bridge source, tests, pipe protocol, and
+install records) is maintained separately and builds with `build.cmd`,
+`build-mod.cmd`, and `build-tests.cmd` using the local Visual Studio Roslyn
+compiler - no package restore or network downloads.
+
+## Checksums
+
+`CHECKSUMS-SHA256.txt` in this folder lists SHA-256 hashes for the launcher,
+GUI, CLI, bridge DLL, `version.dll`, `Loader.cfg`, and `MelonLoader.dll`.
+Verify them after download before use.
+
+---
+
+## Credits
+
+Created and maintained by **Enterless / Intel Database**.
+
+- Website: https://www.inteldatabase.org
+- Email: enterless@inteldatabase.org
+
+Not affiliated with the game's developers or Steam.

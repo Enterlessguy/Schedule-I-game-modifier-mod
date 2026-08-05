@@ -1,0 +1,58 @@
+Dependency audit - 2026-07-13
+================================
+
+ScheduleIControlCenter.exe (package root launcher)
+--------------------------------------------------
+Architecture: x64
+Runtime: .NET Framework 4.x (validated on 4.8.1)
+Framework references only:
+  mscorlib
+  System
+  System.Core
+  System.Drawing
+  System.Windows.Forms
+Private/NuGet DLL dependencies: none
+
+Behavior: locates Schedule I (default Steam path, Steam registry/library
+folders, then a bounded fixed-drive search), optionally attaches the runtime
+package files into the game folder after user confirmation, and starts
+ScheduleI-ControlCenter\dist\ScheduleIControlCenter.exe. It writes only into
+the selected game folder; no elevation, network access, persistence, or
+deletion is performed.
+
+ScheduleIControlCenter.exe
+--------------------------
+Architecture: x64
+Runtime: .NET Framework 4.x (validated on 4.8.1)
+Framework references only:
+  mscorlib
+  System
+  System.Core
+  System.Drawing
+  System.Web.Extensions
+  System.Windows.Forms
+Private/NuGet DLL dependencies: none
+
+Live-control layer
+------------------
+The GUI can open without a private companion DLL, but live game operations need:
+  Mods\ScheduleIControlBridge.dll
+  version.dll (MelonLoader bootstrap)
+  MelonLoader\ (0.7.3 runtime and generated IL2CPP interop assemblies)
+  UserData\Loader.cfg (current loader configuration)
+  the matching Schedule I game installation
+  x64 .NET 6.0.36 registered on Windows
+
+The bridge resolves Harmony, Il2CppInterop, Newtonsoft.Json, Unity, FishNet,
+ScheduleOne, and generated Assembly-CSharp references from the included
+MelonLoader tree and the matching game-generated environment. Plugins and
+UserLibs were empty and are not dependencies.
+
+Optional state, not dependencies
+--------------------------------
+UserData\ScheduleIControlBridge.market-values.json
+UserData\ScheduleIControlBridge.customer-allowances.json
+UserData\ScheduleIControlBridge.sell-price-limit.json (created only after apply)
+
+Those profiles were deliberately excluded from this runtime package so the ZIP
+does not silently copy the user's current economic settings or rollback history.
