@@ -218,6 +218,10 @@ shown when a target is out of range.
   User data such as saves, bridge profiles, install records, and backups is
   never touched.
 
+Security hardening in v0.5.0: the bridge re-validates every value read back
+from its effect and laundering profiles on load, so a tampered or corrupt
+profile file can never push out-of-range values into the game.
+
 ---
 
 ## Safety notes
