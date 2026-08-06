@@ -5,7 +5,7 @@ Unofficial, task-focused control center and modifier for **Schedule I**
 customer affordability scaling, sell-value / deal-limit controls, and safe
 offline save tools in one window.
 
-**Version:** v0.5.0 (bridge v0.5.0, protocol v1)
+**Version:** v1.0.0 (bridge v1.0.0, protocol v1)
 
 **Release ZIP password:** `INTEL DATABASE`
 
@@ -18,7 +18,7 @@ offline save tools in one window.
 - `ScheduleI-ControlCenter\dist\ScheduleIControlCenter.exe` - the Control
   Center GUI.
 - `ScheduleI-ControlCenter\dist\ScheduleIControlCenter.Cli.exe` - offline CLI.
-- `Mods\ScheduleIControlBridge.dll` - the v0.5.0 in-game bridge mod.
+- `Mods\ScheduleIControlBridge.dll` - the v1.0.0 in-game bridge mod.
 - `version.dll` + `MelonLoader\` - MelonLoader 0.7.3.2525 runtime tree with a
   null-safety-patched Il2CppInterop 1.5.3 generator (see "0.4.6f11
   compatibility" below).
@@ -43,7 +43,7 @@ settings profiles** - those stay on your machine.
 
 1. Close Schedule I and the Control Center.
 2. Extract the release ZIP (password: `INTEL DATABASE`) anywhere, or copy the
-   whole `ScheduleI-Control-Center-v0.5.0` folder wherever you like.
+   whole `ScheduleI-Control-Center-v1.0.0` folder wherever you like.
 3. Run `ScheduleIControlCenter.exe` - the launcher next to this readme.
 4. The launcher searches for Schedule I (default Steam path first, then Steam
    library folders, then a bounded system-wide search) and shows the folder it
@@ -221,6 +221,20 @@ shown when a target is out of range.
 Security hardening in v0.5.0: the bridge re-validates every value read back
 from its effect and laundering profiles on load, so a tampered or corrupt
 profile file can never push out-of-range values into the game.
+
+### v1.0.0: modernised user interface
+
+- Full UI redesign: warm minimal palette, graphite header with status chips,
+  flat owner-drawn tabs, clean cards and buttons, and a consistent modern grid
+  theme on every page.
+- Per-monitor DPI support and a 96-DPI design baseline, so text stays crisp
+  and layouts scale correctly on any display.
+- Fixed the collapsing-table and misaligned-control issues on every tab;
+  grids now fill their pages and controls share consistent baselines.
+- Home page redesigned with a state-colored status accent, clearer action
+  card, and plain-language headings.
+- Plain-language naming throughout: Refresh / Preview / Apply, Buy (live) /
+  Buy (offline), Back up, Check files, and simpler column headers.
 
 ---
 
