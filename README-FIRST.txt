@@ -1,4 +1,4 @@
-Schedule I Control Center v0.4.3 - non-game runtime package
+Schedule I Control Center v0.5.0 - non-game runtime package
 ==========================================================
 
 This folder mirrors files relative to the Schedule I installation root.
@@ -40,7 +40,7 @@ Included
 - ScheduleIControlCenter.exe (launcher: locate, attach, and launch)
 - ScheduleI-ControlCenter\dist\ScheduleIControlCenter.exe
 - ScheduleI-ControlCenter\dist\ScheduleIControlCenter.Cli.exe
-- Mods\ScheduleIControlBridge.dll (v0.4.3)
+- Mods\ScheduleIControlBridge.dll (v0.5.0)
 - version.dll and the installed MelonLoader 0.7.3.2525 runtime tree, including
   a null-safety-patched Il2CppInterop 1.5.3 generator for Schedule I 0.4.6f11
 - UserData\Loader.cfg
