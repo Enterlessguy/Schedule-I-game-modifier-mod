@@ -5,7 +5,7 @@ Unofficial, task-focused control center and modifier for **Schedule I**
 customer affordability scaling, sell-value / deal-limit controls, and safe
 offline save tools in one window.
 
-**Version:** v0.4.2 (bridge v0.4.2, protocol v1)
+**Version:** v0.4.3 (bridge v0.4.3, protocol v1)
 
 **Release ZIP password:** `INTEL DATABASE`
 
@@ -18,7 +18,7 @@ offline save tools in one window.
 - `ScheduleI-ControlCenter\dist\ScheduleIControlCenter.exe` - the Control
   Center GUI.
 - `ScheduleI-ControlCenter\dist\ScheduleIControlCenter.Cli.exe` - offline CLI.
-- `Mods\ScheduleIControlBridge.dll` - the v0.4.2 in-game bridge mod.
+- `Mods\ScheduleIControlBridge.dll` - the v0.4.3 in-game bridge mod.
 - `version.dll` + `MelonLoader\` - MelonLoader 0.7.3.2525 runtime tree with a
   null-safety-patched Il2CppInterop 1.5.3 generator (see "0.4.6f11
   compatibility" below).
@@ -43,7 +43,7 @@ settings profiles** - those stay on your machine.
 
 1. Close Schedule I and the Control Center.
 2. Extract the release ZIP (password: `INTEL DATABASE`) anywhere, or copy the
-   whole `ScheduleI-Control-Center-v0.4.1` folder wherever you like.
+   whole `ScheduleI-Control-Center-v0.4.3` folder wherever you like.
 3. Run `ScheduleIControlCenter.exe` - the launcher next to this readme.
 4. The launcher searches for Schedule I (default Steam path first, then Steam
    library folders, then a bounded system-wide search) and shows the folder it
@@ -188,6 +188,15 @@ work immediately. The rejected file is left untouched on disk and is replaced
 atomically on the next apply. Previously the bridge stayed disabled for the
 whole session after rejecting an incompatible profile, which made the market
 and allowance operations unavailable.
+
+### v0.4.3 fix: manual cell editing
+
+Double-clicking a planned value in the Products, Sell Values, or Customers
+grids no longer crashes with "cannot commit or quit a cell value change" when
+another cell edit is still pending. The grid now commits or cancels the
+pending edit before moving. Manual fair-value targets remain intentionally
+bounded to 0.1x-10x of the product's original value, with the exact factor
+shown when a target is out of range.
 
 ---
 
