@@ -5,7 +5,7 @@ Unofficial, task-focused control center and modifier for **Schedule I**
 customer affordability scaling, sell-value / deal-limit controls, and safe
 offline save tools in one window.
 
-**Version:** v0.4.1 (bridge v0.4.1, protocol v1)
+**Version:** v0.4.2 (bridge v0.4.2, protocol v1)
 
 **Release ZIP password:** `INTEL DATABASE`
 
@@ -18,7 +18,7 @@ offline save tools in one window.
 - `ScheduleI-ControlCenter\dist\ScheduleIControlCenter.exe` - the Control
   Center GUI.
 - `ScheduleI-ControlCenter\dist\ScheduleIControlCenter.Cli.exe` - offline CLI.
-- `Mods\ScheduleIControlBridge.dll` - the v0.4.1 in-game bridge mod.
+- `Mods\ScheduleIControlBridge.dll` - the v0.4.2 in-game bridge mod.
 - `version.dll` + `MelonLoader\` - MelonLoader 0.7.3.2525 runtime tree with a
   null-safety-patched Il2CppInterop 1.5.3 generator (see "0.4.6f11
   compatibility" below).
@@ -178,6 +178,16 @@ The same update also changed the game's counteroffer/handover UI internals:
 now use the shared `AmountSelector` component, and the old
 `HandoverScreenPriceSelector` was removed. The bridge v0.4.1 patches were
 re-targeted accordingly.
+
+### v0.4.2 fix: persistence recovery
+
+When an older build-scoped market/allowance profile is rejected after a game
+update (or a profile file is unreadable), the bridge now starts clean with a
+fresh empty profile and persistence ready, so the Products and Customers tabs
+work immediately. The rejected file is left untouched on disk and is replaced
+atomically on the next apply. Previously the bridge stayed disabled for the
+whole session after rejecting an incompatible profile, which made the market
+and allowance operations unavailable.
 
 ---
 
