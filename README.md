@@ -5,7 +5,7 @@ Unofficial, task-focused control center and modifier for **Schedule I**
 customer affordability scaling, sell-value / deal-limit controls, and safe
 offline save tools in one window.
 
-**Version:** v0.4.0 (bridge v0.4.0, protocol v1)
+**Version:** v0.4.1 (bridge v0.4.1, protocol v1)
 
 **Release ZIP password:** `INTEL DATABASE`
 
@@ -18,8 +18,10 @@ offline save tools in one window.
 - `ScheduleI-ControlCenter\dist\ScheduleIControlCenter.exe` - the Control
   Center GUI.
 - `ScheduleI-ControlCenter\dist\ScheduleIControlCenter.Cli.exe` - offline CLI.
-- `Mods\ScheduleIControlBridge.dll` - the v0.4.0 in-game bridge mod.
-- `version.dll` + `MelonLoader\` - MelonLoader 0.7.3 runtime tree.
+- `Mods\ScheduleIControlBridge.dll` - the v0.4.1 in-game bridge mod.
+- `version.dll` + `MelonLoader\` - MelonLoader 0.7.3.2525 runtime tree with a
+  null-safety-patched Il2CppInterop 1.5.3 generator (see "0.4.6f11
+  compatibility" below).
 - `UserData\Loader.cfg` - loader configuration.
 - `CHECKSUMS-SHA256.txt` - SHA-256 hashes of the key files.
 
@@ -33,7 +35,7 @@ settings profiles** - those stay on your machine.
 - 64-bit Windows
 - .NET Framework 4.8.1 (Control Center GUI and launcher)
 - x64 .NET 6.0.36 runtime (MelonLoader)
-- Schedule I `0.4.5f2`, Steam build `22829923` (for live mutation support)
+- Schedule I `0.4.6f11`, Steam build `24484559` (for live mutation support)
 
 ---
 
@@ -41,7 +43,7 @@ settings profiles** - those stay on your machine.
 
 1. Close Schedule I and the Control Center.
 2. Extract the release ZIP (password: `INTEL DATABASE`) anywhere, or copy the
-   whole `ScheduleI-Control-Center-v0.4.0` folder wherever you like.
+   whole `ScheduleI-Control-Center-v0.4.1` folder wherever you like.
 3. Run `ScheduleIControlCenter.exe` - the launcher next to this readme.
 4. The launcher searches for Schedule I (default Steam path first, then Steam
    library folders, then a bounded system-wide search) and shows the folder it
@@ -151,11 +153,31 @@ envelope - it does not force a sale.
 The `$9,999` maximum is the total entered in counteroffers and handovers. The
 `$1..$999` range is the unit price per product. They are independent controls;
 the Sell Values page keeps them clearly separated. A custom total is applied
-through four reviewed Harmony replacements
-(`CounterofferInterface.ChangePrice`, `.PriceSubmitted`, `.Send`, and
-`HandoverScreenPriceSelector.SetPrice`) and persists in a bridge-sidecar
-profile. The native `MaxPrice` static wrappers are intentionally untouched
-because the reviewed native methods inline their `$9,999` constants.
+through three reviewed Harmony replacements (`CounterofferInterface.Send`,
+`HandoverScreen.PriceChanged`, and `HandoverScreen.DonePressed`) and persists
+in a bridge-sidecar profile. The native `MaxPrice` static wrappers are
+intentionally untouched because the reviewed native methods inline their
+`$9,999` constants.
+
+## 0.4.6f11 compatibility
+
+Schedule I `0.4.6f11` (Steam build `24484559`) ships a new IL2CPP metadata
+dump that crashes the interop generator bundled with every released MelonLoader
+and Il2CppInterop (`Pass11ComputeTypeSpecifics` null reference, followed by
+unresolvable stripped Unity types such as `Camera+GateFitMode`). This package
+therefore ships a **patched Il2CppInterop 1.5.3 generator**: three surgical
+null-safety guards that mirror the generator's own safe fallbacks (unresolvable
+field types are treated as non-blittable instead of crashing). The patch is
+applied only to `MelonLoader\net6\Il2CppInterop.Generator.dll` and is
+documented in `CHECKSUMS-SHA256.txt`; the rest of the MelonLoader tree is the
+official 0.7.3.2525 nightly. Interop for this exact game build is pre-generated
+in the package, so no on-demand generation is needed on first run.
+
+The same update also changed the game's counteroffer/handover UI internals:
+`CounterofferInterface` moved to the `UI.Phone` namespace, the price controls
+now use the shared `AmountSelector` component, and the old
+`HandoverScreenPriceSelector` was removed. The bridge v0.4.1 patches were
+re-targeted accordingly.
 
 ---
 

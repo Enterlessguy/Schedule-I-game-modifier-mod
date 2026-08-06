@@ -7,7 +7,7 @@
   "targets": {
     ".NETCoreApp,Version=v6.0": {},
     ".NETCoreApp,Version=v6.0/win-x64": {
-      "MelonLoader/0.7.3": {
+      "MelonLoader/0.7.3.2525": {
         "dependencies": {
           "AsmResolver.DotNet": "6.0.0-beta.5",
           "AssetRipper.Primitives": "3.2.0",
@@ -471,7 +471,7 @@
     }
   },
   "libraries": {
-    "MelonLoader/0.7.3": {
+    "MelonLoader/0.7.3.2525": {
       "type": "project",
       "serviceable": false,
       "sha512": ""

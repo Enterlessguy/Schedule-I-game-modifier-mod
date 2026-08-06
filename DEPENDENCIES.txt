@@ -1,4 +1,4 @@
-Dependency audit - 2026-07-13
+Dependency audit - 2026-08-06
 ================================
 
 ScheduleIControlCenter.exe (package root launcher)
@@ -38,7 +38,7 @@ Live-control layer
 The GUI can open without a private companion DLL, but live game operations need:
   Mods\ScheduleIControlBridge.dll
   version.dll (MelonLoader bootstrap)
-  MelonLoader\ (0.7.3 runtime and generated IL2CPP interop assemblies)
+  MelonLoader\ (0.7.3.2525 runtime and generated IL2CPP interop assemblies)
   UserData\Loader.cfg (current loader configuration)
   the matching Schedule I game installation
   x64 .NET 6.0.36 registered on Windows
@@ -47,6 +47,16 @@ The bridge resolves Harmony, Il2CppInterop, Newtonsoft.Json, Unity, FishNet,
 ScheduleOne, and generated Assembly-CSharp references from the included
 MelonLoader tree and the matching game-generated environment. Plugins and
 UserLibs were empty and are not dependencies.
+
+Patched component
+-----------------
+MelonLoader\net6\Il2CppInterop.Generator.dll is Il2CppInterop 1.5.3 with three
+surgical null-safety guards (Pass11ComputeTypeSpecifics, RewriteTypeRef, and
+JudgeSpecificsByOriginalType) so Schedule I 0.4.6f11 metadata that references
+stripped Unity types (for example UnityEngine.Camera+GateFitMode) generates
+interop assemblies instead of crashing. All other files in the MelonLoader
+tree are the official 0.7.3.2525 CI build and official Il2CppInterop 1.5.3
+binaries. Interop for game build 24484559 is pre-generated in Il2CppAssemblies.
 
 Optional state, not dependencies
 --------------------------------

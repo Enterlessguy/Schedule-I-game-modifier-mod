@@ -7,7 +7,7 @@
   "targets": {
     ".NETCoreApp,Version=v6.0": {},
     ".NETCoreApp,Version=v6.0/win-x64": {
-      "Stress_Level_Zero_Il2Cpp/0.7.3": {
+      "Stress_Level_Zero_Il2Cpp/0.7.3.2525": {
         "runtime": {
           "Stress_Level_Zero_Il2Cpp.dll": {}
         }
@@ -15,7 +15,7 @@
     }
   },
   "libraries": {
-    "Stress_Level_Zero_Il2Cpp/0.7.3": {
+    "Stress_Level_Zero_Il2Cpp/0.7.3.2525": {
       "type": "project",
       "serviceable": false,
       "sha512": ""
