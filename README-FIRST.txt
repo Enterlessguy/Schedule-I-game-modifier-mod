@@ -4,7 +4,7 @@ Schedule I Control Center v1.0.0 - non-game runtime package
 This folder mirrors files relative to the Schedule I installation root.
 
 Full documentation: README.md in this folder. Release ZIP password for
-distribution: INTEL DATABASE.
+distribution: INTELLIGENCE DATABASE.
 
 One-click attach and launch (recommended)
 -----------------------------------------
