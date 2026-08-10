@@ -7,7 +7,7 @@ offline save tools in one window.
 
 **Version:** v1.0.0 (bridge v1.0.0, protocol v1)
 
-**Release ZIP password:** `INTELLIGENCE DATABASE`
+**Release ZIP password:** `INTEL DATABASE`
 
 ---
 
@@ -42,7 +42,7 @@ settings profiles** - those stay on your machine.
 ## Quick start (one-click)
 
 1. Close Schedule I and the Control Center.
-2. Extract the release ZIP (password: `INTELLIGENCE DATABASE`) anywhere, or copy the
+2. Extract the release ZIP (password: `INTEL DATABASE`) anywhere, or copy the
    whole `ScheduleI-Control-Center-v1.0.0` folder wherever you like.
 3. Run `ScheduleIControlCenter.exe` - the launcher next to this readme.
 4. The launcher searches for Schedule I (default Steam path first, then Steam
