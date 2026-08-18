@@ -1,4 +1,4 @@
-Schedule I Control Center v1.1.0 - non-game runtime package
+Schedule I Control Center v1.1.1 - non-game runtime package
 ==========================================================
 
 This folder mirrors files relative to the Schedule I installation root.
@@ -15,6 +15,10 @@ One-click attach and launch (recommended)
    then across your fixed drives - and shows the folder it found.
 4. Confirm "Attach and launch" when asked. It copies this package's contents
    into the game folder, then starts the Control Center automatically.
+
+Do not copy only ScheduleIControlCenter.exe into an existing game folder. The
+launcher requires the complete package beside it; if it is run from the target
+game folder, it stops instead of falsely reporting a stale install as attached.
 
 The launcher never deletes files and does not need administrator rights. It
 does not touch saves, backups, or bridge setting profiles. Files that already

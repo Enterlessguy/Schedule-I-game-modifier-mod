@@ -5,7 +5,7 @@ Unofficial, task-focused control center and modifier for **Schedule I**
 customer affordability scaling, sell-value / deal-limit controls, and safe
 offline save tools in one window.
 
-**Version:** v1.1.0 (bridge v1.1.0, protocol v1)
+**Version:** v1.1.1 (attacher fix; bridge v1.1.0, protocol v1)
 
 **Release ZIP password:** `INTEL DATABASE`
 
@@ -50,6 +50,10 @@ settings profiles** - those stay on your machine.
    found.
 5. Click **Attach and launch**. The runtime is copied into the game folder and
    the Control Center starts automatically.
+
+Run the launcher from the complete package directory. Do not copy only the EXE
+into an existing game folder; v1.1.1 detects that case and stops with an
+explicit error instead of silently leaving stale runtime files in place.
 
 The launcher never deletes files, needs no administrator rights, and does not
 touch saves, backups, or bridge settings. Files that are already present and
