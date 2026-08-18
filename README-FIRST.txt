@@ -1,4 +1,4 @@
-Schedule I Control Center v1.0.0 - non-game runtime package
+Schedule I Control Center v1.1.0 - non-game runtime package
 ==========================================================
 
 This folder mirrors files relative to the Schedule I installation root.
@@ -40,9 +40,9 @@ Included
 - ScheduleIControlCenter.exe (launcher: locate, attach, and launch)
 - ScheduleI-ControlCenter\dist\ScheduleIControlCenter.exe
 - ScheduleI-ControlCenter\dist\ScheduleIControlCenter.Cli.exe
-- Mods\ScheduleIControlBridge.dll (v1.0.0)
+- Mods\ScheduleIControlBridge.dll (v1.1.0; Schedule I 0.4.6f13 / Steam build 24705572)
 - version.dll and the installed MelonLoader 0.7.3.2525 runtime tree, including
-  a null-safety-patched Il2CppInterop 1.5.3 generator for Schedule I 0.4.6f11
+  a null-safety-patched Il2CppInterop 1.5.3 generator for Schedule I 0.4.6f13
 - UserData\Loader.cfg
 
 Intentionally excluded
@@ -57,7 +57,7 @@ System prerequisites (documented, not copied as loose files)
 - 64-bit Windows
 - .NET Framework 4.8.1 for the WinForms Control Center and launcher
 - 64-bit .NET 6.0.36 runtime for this installed MelonLoader build
-- Schedule I 0.4.6f11, Steam build 24484559, for live mutation support
+- Schedule I 0.4.6f13, Steam build 24705572, for live mutation support
 
 Loose copies of installed .NET system files are not portable installers, so
 they are not included. Both required runtimes are already installed on the
