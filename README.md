@@ -5,7 +5,7 @@ Unofficial, task-focused control center and modifier for **Schedule I**
 customer affordability scaling, sell-value / deal-limit controls, and safe
 offline save tools in one window.
 
-**Version:** v1.0.0 (bridge v1.0.0, protocol v1)
+**Version:** v1.1.0 (bridge v1.1.0, protocol v1)
 
 **Release ZIP password:** `INTEL DATABASE`
 
@@ -18,9 +18,9 @@ offline save tools in one window.
 - `ScheduleI-ControlCenter\dist\ScheduleIControlCenter.exe` - the Control
   Center GUI.
 - `ScheduleI-ControlCenter\dist\ScheduleIControlCenter.Cli.exe` - offline CLI.
-- `Mods\ScheduleIControlBridge.dll` - the v1.0.0 in-game bridge mod.
+- `Mods\ScheduleIControlBridge.dll` - the v1.1.0 in-game bridge mod.
 - `version.dll` + `MelonLoader\` - MelonLoader 0.7.3.2525 runtime tree with a
-  null-safety-patched Il2CppInterop 1.5.3 generator (see "0.4.6f11
+  null-safety-patched Il2CppInterop 1.5.3 generator (see "0.4.6f13
   compatibility" below).
 - `UserData\Loader.cfg` - loader configuration.
 - `CHECKSUMS-SHA256.txt` - SHA-256 hashes of the key files.
@@ -35,7 +35,7 @@ settings profiles** - those stay on your machine.
 - 64-bit Windows
 - .NET Framework 4.8.1 (Control Center GUI and launcher)
 - x64 .NET 6.0.36 runtime (MelonLoader)
-- Schedule I `0.4.6f11`, Steam build `24484559` (for live mutation support)
+- Schedule I `0.4.6f13`, Steam build `24705572` (for live mutation support)
 
 ---
 
@@ -43,7 +43,7 @@ settings profiles** - those stay on your machine.
 
 1. Close Schedule I and the Control Center.
 2. Extract the release ZIP (password: `INTEL DATABASE`) anywhere, or copy the
-   whole `ScheduleI-Control-Center-v1.0.0` folder wherever you like.
+   whole `ScheduleI-Control-Center-v1.1.0` folder wherever you like.
 3. Run `ScheduleIControlCenter.exe` - the launcher next to this readme.
 4. The launcher searches for Schedule I (default Steam path first, then Steam
    library folders, then a bounded system-wide search) and shows the folder it
@@ -159,9 +159,9 @@ in a bridge-sidecar profile. The native `MaxPrice` static wrappers are
 intentionally untouched because the reviewed native methods inline their
 `$9,999` constants.
 
-## 0.4.6f11 compatibility
+## 0.4.6f13 compatibility
 
-Schedule I `0.4.6f11` (Steam build `24484559`) ships a new IL2CPP metadata
+Schedule I `0.4.6f13` (Steam build `24705572`) ships a new IL2CPP metadata
 dump that crashes the interop generator bundled with every released MelonLoader
 and Il2CppInterop (`Pass11ComputeTypeSpecifics` null reference, followed by
 unresolvable stripped Unity types such as `Camera+GateFitMode`). This package
@@ -235,6 +235,18 @@ profile file can never push out-of-range values into the game.
   card, and plain-language headings.
 - Plain-language naming throughout: Refresh / Preview / Apply, Buy (live) /
   Buy (offline), Back up, Check files, and simpler column headers.
+
+### v1.1.0: f13 bridge refresh and compatibility guard
+
+- Updated the bridge and packaged Control Center binaries for Schedule I
+  `0.4.6f13` / Steam build `24705572`; the runtime fingerprint is checked
+  before live patches are enabled.
+- On an unknown game build, the bridge runs its diagnostic target checks first
+  and asks for explicit confirmation before enabling compatibility mode. A
+  failed diagnostic keeps mutations disabled instead of silently targeting
+  changed methods.
+- The attach launcher replaces stale bridge, GUI, CLI, and launcher binaries
+  wholesale, while keeping rollback copies and user data untouched.
 
 ---
 
