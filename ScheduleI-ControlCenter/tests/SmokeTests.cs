@@ -6,13 +6,20 @@ namespace ScheduleIControlCenter
 {
     internal static class SmokeTests
     {
-        private static int Main()
+        private static int Main(string[] args)
         {
             string temp = Path.Combine(Path.GetTempPath(), "ScheduleI-ControlCenter-Smoke-" + Guid.NewGuid().ToString("N"));
             try
             {
+                if (args != null && args.Length == 2 && string.Equals(args[0], "--verify-package", StringComparison.OrdinalIgnoreCase))
+                {
+                    UpdateTests.VerifyReleasePackage(args[1]);
+                    Console.WriteLine("PASS: complete release ZIP passed updater extraction, identity, version, and transactional-install validation.");
+                    return 0;
+                }
                 DiagnosticsTests.RunAll();
                 InventoryPagingTests.RunAll();
+                UpdateTests.RunAll();
                 Console.WriteLine("PASS: native-eight paging model, transaction rollback, save gate, sidecar validation, downgrade, and speed-independence tests.");
                 GameEnvironment realEnvironment;
                 try

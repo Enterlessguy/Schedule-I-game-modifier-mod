@@ -11,6 +11,11 @@ namespace ScheduleIControlCenter
         [STAThread]
         private static void Main(string[] args)
         {
+            if (UpdateInstaller.IsApplyMode(args))
+            {
+                Environment.ExitCode = UpdateInstaller.Run(args);
+                return;
+            }
             DiagnosticsService.InitializeGlobalHandlers();
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);

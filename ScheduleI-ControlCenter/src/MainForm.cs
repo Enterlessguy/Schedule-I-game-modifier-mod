@@ -130,6 +130,7 @@ namespace ScheduleIControlCenter
             this.environment = environment;
             saves = new SaveService(environment);
             bridge = new BridgeClient();
+            updateService = new UpdateService();
 
             Text = "Schedule I Control Center - " + ReleaseInfo.Label;
             StartPosition = FormStartPosition.CenterScreen;
@@ -168,7 +169,9 @@ namespace ScheduleIControlCenter
             {
                 ApplyNativeDarkMode(this);
                 statusTimer.Start();
+                ShowCompletedUpdateIfNeeded();
                 await RefreshRuntimeStatusAsync();
+                await CheckForUpdatesAsync(true);
             };
             FormClosed += delegate { statusTimer.Stop(); };
         }
@@ -212,6 +215,10 @@ namespace ScheduleIControlCenter
             TabPage savesPage = BuildSaveToolsPage();
             savesPage.Text = "Save & safety";
             navigation.TabPages.Add(savesPage);
+
+            TabPage updates = BuildUpdatesPage();
+            updates.Text = "Updates";
+            navigation.TabPages.Add(updates);
 
             TabPage help = BuildHelpPage();
             help.Text = "Help center";
@@ -410,9 +417,10 @@ namespace ScheduleIControlCenter
             nav.Controls.Add(CreateSidebarButton("Drug effects", 4));
             nav.Controls.Add(SidebarSectionLabel("SYSTEM"));
             nav.Controls.Add(CreateSidebarButton("Save & safety", 5));
-            nav.Controls.Add(CreateSidebarButton("Help center", 6));
+            nav.Controls.Add(CreateSidebarButton("Updates", 6));
+            nav.Controls.Add(CreateSidebarButton("Help center", 7));
             nav.Controls.Add(SidebarSectionLabel("POWER TOOLS"));
-            nav.Controls.Add(CreateSidebarButton("Diagnostics", 7));
+            nav.Controls.Add(CreateSidebarButton("Diagnostics", 8));
 
             Label build = new Label
             {
@@ -472,8 +480,8 @@ namespace ScheduleIControlCenter
 
         private void UpdateWorkspaceSelection()
         {
-            string[] titles = { "Overview", "Market intelligence", "Player & inventory", "Business operations", "Drug effects", "Save & safety", "Help center", "Diagnostics" };
-            string[] kickers = { "SYSTEM OVERVIEW", "LIVE ECONOMY", "PLAYER CONTROL", "OWNED INFRASTRUCTURE", "PRODUCT BEHAVIOR", "OFFLINE SAFETY", "KNOWLEDGE BASE", "POWER TOOLS" };
+            string[] titles = { "Overview", "Market intelligence", "Player & inventory", "Business operations", "Drug effects", "Save & safety", "Updates", "Help center", "Diagnostics" };
+            string[] kickers = { "SYSTEM OVERVIEW", "LIVE ECONOMY", "PLAYER CONTROL", "OWNED INFRASTRUCTURE", "PRODUCT BEHAVIOR", "OFFLINE SAFETY", "RELEASE SYNC", "KNOWLEDGE BASE", "POWER TOOLS" };
             int selected = Math.Max(0, Math.Min(navigation.SelectedIndex, titles.Length - 1));
             workspaceTitle.Text = titles[selected];
             workspaceKicker.Text = kickers[selected];

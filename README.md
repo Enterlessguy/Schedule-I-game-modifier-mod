@@ -6,7 +6,7 @@ visual identity.
 
 V2 introduces the redesigned control-center interface, clearer workspace
 navigation, the Intelligence Database startup sequence, expanded diagnostics,
-and a one-click attach-and-launch package.
+one-click attach-and-launch packaging, and guarded GitHub Release updates.
 
 > Read [RELEASE_NOTES_V2.md](RELEASE_NOTES_V2.md) for the complete V2 summary.
 
@@ -39,6 +39,8 @@ confirmed game folder and records an install summary for troubleshooting.
 - **Drug effects** — supported product and effect workflows.
 - **Save & safety** — backup, validation, console enablement, and protected
   offline operations.
+- **Updates** — automatic stable-release checks, cached offline metadata,
+  release notes, verified full-package download, and transactional install.
 - **Help center** — quick-start guidance, terminology, safety rules, rollback,
   and common troubleshooting steps.
 - **Diagnostics** — health checks, incident history, reasoning, evidence,
@@ -83,13 +85,31 @@ installation is accessible to the current Windows user.
 
 ## Trust and privacy
 
-The application operates locally and does not transmit user information. See
+Control and save operations remain local. On startup, the graphical app makes
+a read-only HTTPS request to this repository's public GitHub Releases API to
+check for a newer stable version. It does not upload a user name, save data,
+diagnostic report, or application settings. A release ZIP is downloaded only
+after the user selects **Download and install**. See
 [PRIVACY.md](PRIVACY.md), [SECURITY.md](SECURITY.md), and the
 [code signing policy](SIGNING_POLICY.md).
 
+## Application updates
+
+Updates are sourced only from stable, versioned GitHub Releases in this public
+repository. The Control Center accepts the documented complete-package asset,
+requires a GitHub-provided SHA-256 digest, validates executable publisher and
+version metadata, rejects unsafe archive paths, backs up every replaced or
+removed managed file, and rolls the transaction back if installation fails.
+
+The package is synchronized as a unit, so releases can update the GUI, bridge,
+launcher, CLI, documentation, and supporting runtime files. Files created by
+the user—saves, Control Center backups, diagnostics, install records, and update
+history—are outside the managed release manifest and are not removed. A stable
+release must use a newer semantic version tag for installed copies to detect it.
+
 ## Release identity
 
-- Control Center: **V2** (`2.0.0.0`)
+- Control Center: **V2** (`2.0.1.0`)
 - Bridge: **v1.1.0**
 - Reviewed Schedule I build: **0.4.6f13**
 
