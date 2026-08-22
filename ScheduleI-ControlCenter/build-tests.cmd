@@ -12,15 +12,19 @@ if not exist "%ROOT%tests\bin" mkdir "%ROOT%tests\bin"
   /reference:"%FX%\System.dll" ^
   /reference:"%FX%\System.Core.dll" ^
   /reference:"%FX%\System.Web.Extensions.dll" ^
+  /reference:"%FX%\System.IO.Compression.dll" ^
+  /reference:"%FX%\System.IO.Compression.FileSystem.dll" ^
   "%ROOT%src\Models.cs" ^
   "%ROOT%src\Diagnostics.cs" ^
   "%ROOT%src\ReleaseInfo.cs" ^
   "%ROOT%src\JsonUtil.cs" ^
   "%ROOT%src\GameEnvironment.cs" ^
   "%ROOT%src\SaveService.cs" ^
+  "%ROOT%src\UpdateService.cs" ^
   "%ROOT%mod\ScheduleIControlBridge\InventoryPagingModel.cs" ^
   "%ROOT%tests\InventoryPagingTests.cs" ^
   "%ROOT%tests\DiagnosticsTests.cs" ^
+  "%ROOT%tests\UpdateTests.cs" ^
   "%ROOT%tests\SmokeTests.cs"
 
 if errorlevel 1 exit /b %errorlevel%

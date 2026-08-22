@@ -11,6 +11,8 @@ I Control Center V2.
   operations.
 - `protocol/` — versioned local named-pipe contract.
 - `tests/` — diagnostics, save-safety, and inventory paging regression tests.
+- `src/UpdateService.cs` — stable GitHub Release discovery, verified package
+  download, transactional synchronization, rollback, and update history.
 
 Generated binaries, game assemblies, save data, backups, runtime logs, local
 configuration, and install records are not source and must not be committed.
@@ -46,3 +48,6 @@ Third-party components retain their own terms; see
   remote network execution.
 - Property ownership is acquire-only and live value changes are previewed and
   verified before success is reported.
+- Application updates accept only the complete package from this repository's
+  stable GitHub Releases, verify its SHA-256 digest and executable metadata,
+  and preserve user-generated state outside the managed package manifest.

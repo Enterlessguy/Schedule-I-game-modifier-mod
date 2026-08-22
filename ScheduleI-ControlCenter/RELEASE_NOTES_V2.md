@@ -8,6 +8,13 @@ live bridge and offline save tools in one attach-and-launch package.
 
 ## V2 package refresh
 
+### 2.0.1 — guarded application updates
+
+- Added stable GitHub Release discovery, cached offline release metadata,
+  verified full-package download, transactional synchronization, rollback, and
+  a dedicated Updates workspace.
+- Added a cube-branded post-update changelog screen.
+
 - Replaced the generic Windows executable icon with a crisp multi-resolution
   Intelligence Database cube and Schedule I compatibility badge across the
   launcher, graphical Control Center, and CLI.

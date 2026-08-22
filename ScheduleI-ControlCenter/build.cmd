@@ -24,6 +24,8 @@ if not exist "%ROOT%dist" mkdir "%ROOT%dist"
   /reference:"%FX%\System.Drawing.dll" ^
   /reference:"%FX%\System.Windows.Forms.dll" ^
   /reference:"%FX%\System.Web.Extensions.dll" ^
+  /reference:"%FX%\System.IO.Compression.dll" ^
+  /reference:"%FX%\System.IO.Compression.FileSystem.dll" ^
   "%ROOT%src\AssemblyInfo.cs" ^
   "%ROOT%src\Models.cs" ^
   "%ROOT%src\Diagnostics.cs" ^
@@ -32,10 +34,12 @@ if not exist "%ROOT%dist" mkdir "%ROOT%dist"
   "%ROOT%src\SaveService.cs" ^
   "%ROOT%src\ReleaseInfo.cs" ^
   "%ROOT%src\BridgeClient.cs" ^
+  "%ROOT%src\UpdateService.cs" ^
   "%ROOT%src\IntroSplashForm.cs" ^
   "%ROOT%src\MainForm.Theme.cs" ^
   "%ROOT%src\MainForm.cs" ^
   "%ROOT%src\MainForm.NewTabs.cs" ^
+  "%ROOT%src\MainForm.Updates.cs" ^
   "%ROOT%src\Program.cs"
 
 if errorlevel 1 exit /b %errorlevel%

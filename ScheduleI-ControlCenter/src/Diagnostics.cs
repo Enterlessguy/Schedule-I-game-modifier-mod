@@ -15,7 +15,7 @@ namespace ScheduleIControlCenter
     internal enum DiagnosticCategory
     {
         Startup, Ui, Task, Bridge, Protocol, Filesystem, Save, Backup, Resource,
-        Validation, Compatibility, Security, Configuration, Unknown
+        Validation, Compatibility, Security, Configuration, Update, Unknown
     }
 
     internal sealed class DiagnosticIncident
@@ -135,6 +135,7 @@ namespace ScheduleIControlCenter
             Add(result, "verification", "Verification or rollback warning", "An apply reports success but readback does not match.", "The game may have rejected or normalized a value, or another mutation occurred between apply and readback.", "Stop repeated applies, refresh/read back, and restore the backup only if the resulting state is understood.", "Inspect expected versus actual values and backup path; reports omit save contents.");
             Add(result, "numeric", "Numeric or range validation", "A price, allowance, or multiplier is rejected or clipped.", "The value is outside the exact supported single-precision/whole-dollar range or violates a min/max relationship.", "Use values within the displayed range and ensure minimum does not exceed maximum.", "Inspect requested value and validation code in the incident details.");
             Add(result, "disposal-ui-task", "Disposed control, UI-thread, or background task error", "A late refresh or background action fails after closing or changing pages.", "An asynchronous callback completed after its control was disposed, or a UI update ran off the UI thread.", "Close/reopen the Control Center and retry; if repeatable, provide the incident ID and report.", "Inspect task/UI boundary, thread exception, and operation timing.");
+            Add(result, "update", "Application update or connectivity problem", "Release metadata, download, verification, or installation did not complete.", "GitHub may be unreachable, the package may be incomplete, or a safety validation rejected its contents.", "Keep Schedule I closed, restore connectivity, and retry from Updates. The current installation remains active after a rejected update.", "Inspect the update stage, exception type, expected digest, and installer result; reports exclude downloaded package contents.");
             return result.AsReadOnly();
         }
 
@@ -156,6 +157,7 @@ namespace ScheduleIControlCenter
             if (type.Contains("disposed") || type.Contains("task") || incident.Category == DiagnosticCategory.Ui) return Find("disposal-ui-task");
             if (incident.Category == DiagnosticCategory.Resource || operation.Contains("splash") || operation.Contains("font")) return Find("startup-resource");
             if (incident.Category == DiagnosticCategory.Compatibility) return Find("compatibility");
+            if (incident.Category == DiagnosticCategory.Update || operation.Contains("update")) return Find("update");
             return null;
         }
 
