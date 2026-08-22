@@ -6,6 +6,14 @@ V2 is the packaged Intelligence Database release of the Schedule I Control
 Center. It combines the redesigned dark-blue control surface with the reviewed
 live bridge and offline save tools in one attach-and-launch package.
 
+## V2 package refresh
+
+- Prevented status polling and price workflows from reading or writing unsafe
+  generated IL2CPP price-bound fields. On affected systems those native field
+  accesses could terminate Schedule I before a managed exception was available.
+- Published the Intelligence Database-owned Control Center, bridge, launcher,
+  protocol, and regression-test source under the MIT License.
+
 ## Highlights
 
 - Reworked the WinForms interface into grouped workspace pages for overview,
