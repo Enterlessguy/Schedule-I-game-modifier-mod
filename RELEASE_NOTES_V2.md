@@ -8,6 +8,9 @@ live bridge and offline save tools in one attach-and-launch package.
 
 ## V2 package refresh
 
+- Replaced the generic Windows executable icon with a crisp multi-resolution
+  Intelligence Database cube and Schedule I compatibility badge across the
+  launcher, graphical Control Center, and CLI.
 - Prevented status polling and price workflows from reading or writing unsafe
   generated IL2CPP price-bound fields. On affected systems those native field
   accesses could terminate Schedule I before a managed exception was available.
