@@ -13,6 +13,7 @@ namespace ScheduleIControlCenter
         public static void RunAll()
         {
             CapacityModesAreNativeEightWide();
+            SwapHotkeysAreNormalizedAndBounded();
             FixedModesAllocateAndPersistAllConfiguredPages();
             PageMovementIsClamped();
             ExactItemAndFilterRoundTrip();
@@ -41,6 +42,17 @@ namespace ScheduleIControlCenter
             Require(InventoryPagingModel.PageCountForMode(4) == 1, "mode 4 starts on demand at one page");
             Require(InventoryPagingModel.PageCountForMode(4, 8) == 8 && InventoryPagingModel.CapacityForMode(4, 8) == 64, "mode 4 safe cap");
             Require(InventoryPagingModel.ConfiguredPageCountForMode(2) == 2 && InventoryPagingModel.ConfiguredPageCountForMode(3) == 3 && InventoryPagingModel.ConfiguredPageCountForMode(4) == 8, "configured page count is fixed versus on-demand");
+        }
+
+        private static void SwapHotkeysAreNormalizedAndBounded()
+        {
+            Require(InventoryPagingModel.DefaultSwapHotkey == "RightArrow", "right arrow remains the default swap hotkey");
+            Require(InventoryPagingModel.TryNormalizeSwapHotkey(" rightarrow ", out string arrow) && arrow == "RightArrow", "hotkey normalization is case-insensitive and trimmed");
+            Require(InventoryPagingModel.TryNormalizeSwapHotkey("F12", out string function) && function == "F12", "function hotkey is accepted");
+            Require(InventoryPagingModel.TryNormalizeSwapHotkey("Numpad7", out string numpad) && numpad == "Numpad7", "numpad hotkey is accepted");
+            Require(!InventoryPagingModel.TryNormalizeSwapHotkey("LeftCtrl", out string modifier), "modifier-only hotkey is rejected");
+            Require(!InventoryPagingModel.TryNormalizeSwapHotkey("Escape", out string escape), "escape stays reserved for capture cancellation");
+            Require(!InventoryPagingModel.TryNormalizeSwapHotkey("not-a-key", out string invalid), "unknown hotkey is rejected");
         }
 
         private static void FixedModesAllocateAndPersistAllConfiguredPages()

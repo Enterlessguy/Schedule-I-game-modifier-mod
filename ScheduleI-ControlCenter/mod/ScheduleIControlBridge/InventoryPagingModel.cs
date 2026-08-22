@@ -9,6 +9,36 @@ namespace ScheduleIControlBridge
     {
         public const int NativePageWidth = 8;
         public const int Mode4PageCap = 8;
+        public const string DefaultSwapHotkey = "RightArrow";
+
+        private static readonly HashSet<string> SupportedSwapHotkeys = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+        {
+            "Space", "Enter", "Tab", "Backquote", "Quote", "Semicolon", "Comma", "Period", "Slash", "Backslash",
+            "LeftBracket", "RightBracket", "Minus", "Equals",
+            "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z",
+            "Digit0", "Digit1", "Digit2", "Digit3", "Digit4", "Digit5", "Digit6", "Digit7", "Digit8", "Digit9",
+            "LeftArrow", "RightArrow", "UpArrow", "DownArrow", "Backspace", "PageDown", "PageUp", "Home", "End", "Insert", "Delete",
+            "CapsLock", "NumLock", "PrintScreen", "ScrollLock", "Pause", "ContextMenu",
+            "NumpadEnter", "NumpadDivide", "NumpadMultiply", "NumpadPlus", "NumpadMinus", "NumpadPeriod", "NumpadEquals",
+            "Numpad0", "Numpad1", "Numpad2", "Numpad3", "Numpad4", "Numpad5", "Numpad6", "Numpad7", "Numpad8", "Numpad9",
+            "F1", "F2", "F3", "F4", "F5", "F6", "F7", "F8", "F9", "F10", "F11", "F12", "F13", "F14", "F15", "F16", "F17", "F18", "F19", "F20", "F21", "F22", "F23", "F24"
+        };
+
+        public static bool TryNormalizeSwapHotkey(string value, out string normalized)
+        {
+            normalized = null;
+            if (string.IsNullOrWhiteSpace(value))
+                return false;
+            string candidate = value.Trim();
+            foreach (string supported in SupportedSwapHotkeys)
+            {
+                if (!string.Equals(candidate, supported, StringComparison.OrdinalIgnoreCase))
+                    continue;
+                normalized = supported;
+                return true;
+            }
+            return false;
+        }
 
         public static int ConfiguredPageCountForMode(int mode)
         {

@@ -52,6 +52,8 @@ namespace ScheduleIControlBridge
         private static string lastInventoryError = string.Empty;
         private static int configuredInventoryMode = InventoryModeSingle;
         private static float configuredSpeedMultiplier = 1f;
+        private static string configuredSwapHotkey = InventoryPagingModel.DefaultSwapHotkey;
+        private static Key configuredSwapKey = Key.RightArrow;
         private static int currentPage;
         private static int allocatedPageCount = 1;
         private static PlayerInventory activeInventory;
@@ -72,10 +74,6 @@ namespace ScheduleIControlBridge
         private static string lastPagingInputGate = string.Empty;
         private static string lastPagingInputComponents = string.Empty;
         private static string lastCanonicalInputState = string.Empty;
-        private static bool canonicalKeyboardBindingsApplied;
-        private static bool pagingInputSampleKnown;
-        private static bool lastPagingLeft;
-        private static bool lastPagingRight;
         private static float nextPageSwapAllowedTime;
         private static float lastSuccessfulPageSwapTime = -1f;
         private static GameObject swapNoticeObject;
@@ -93,6 +91,7 @@ namespace ScheduleIControlBridge
         public static long ConfigRevision { get; private set; } = 1;
         public static int ConfiguredInventoryMode { get { return configuredInventoryMode; } }
         public static float ConfiguredSpeedMultiplier { get { return configuredSpeedMultiplier; } }
+        public static string ConfiguredSwapHotkey { get { return configuredSwapHotkey; } }
         public static int NativeHotbarSlots { get { return InventoryReady ? InventoryPagingModel.NativePageWidth : 0; } }
         public static int CurrentPage { get { return currentPage; } }
         public static int AllocatedPageCount { get { return Math.Max(1, allocatedPageCount); } }
@@ -131,6 +130,7 @@ namespace ScheduleIControlBridge
                     ValidateRoot(root);
                     configuredInventoryMode = ClampInventoryMode(root.Value<int?>("inventoryMode") ?? InventoryModeSingle);
                     configuredSpeedMultiplier = ClampSpeed(root.Value<float?>("speedMultiplier") ?? 1f);
+                    SetConfiguredSwapHotkey(root.Value<string>("swapHotkey") ?? InventoryPagingModel.DefaultSwapHotkey);
                 }
                 PersistenceReady = true;
             }
@@ -139,6 +139,7 @@ namespace ScheduleIControlBridge
                 root = CreateEmptyRoot();
                 configuredInventoryMode = InventoryModeSingle;
                 configuredSpeedMultiplier = 1f;
+                SetConfiguredSwapHotkey(InventoryPagingModel.DefaultSwapHotkey);
                 PersistenceReady = true;
                 Warn("Ignored invalid player runtime settings and started clean: " + ex.GetType().Name + ": " + ex.Message);
             }
@@ -270,33 +271,50 @@ namespace ScheduleIControlBridge
                     return;
                 }
 
-                if (GameInput.Instance == null
-                    || GameInput.Instance.GetAction(GameInput.ButtonCode.InventoryLeft) == null
-                    || GameInput.Instance.GetAction(GameInput.ButtonCode.InventoryRight) == null)
+                Keyboard keyboard = Keyboard.current;
+                if (keyboard == null || keyboard[configuredSwapKey] == null)
                 {
-                    AuditPagingInputGate("canonical_action_unavailable");
+                    AuditPagingInputGate("keyboard_unavailable");
                     return;
                 }
 
-                bool left = GameInput.GetButtonDown(GameInput.ButtonCode.InventoryLeft);
-                bool right = GameInput.GetButtonDown(GameInput.ButtonCode.InventoryRight);
-                AuditPagingInputGate("ready");
-                if (!pagingInputSampleKnown || left != lastPagingLeft || right != lastPagingRight)
-                {
-                    pagingInputSampleKnown = true;
-                    lastPagingLeft = left;
-                    lastPagingRight = right;
-                    Audit(string.Format(CultureInfo.InvariantCulture, "op=player.settings.paging_input_sample left={0} right={1}", left, right));
-                }
-                if (left == right)
+                AuditPagingInputGate("ready_" + configuredSwapHotkey);
+                if (!keyboard[configuredSwapKey].wasPressedThisFrame)
                     return;
-                Audit(string.Format(CultureInfo.InvariantCulture,
-                    "op=player.settings.page_input_ignored reason=canonical_callback_path delta={0}", left ? -1 : 1));
+                HandlePagingHotkeyPress();
             }
             catch (Exception ex)
             {
-                Warn("Could not read the canonical player inventory paging actions: " + ex.GetType().Name + ": " + ex.Message);
+                Warn("Could not read the configured player inventory paging hotkey: " + ex.GetType().Name + ": " + ex.Message);
             }
+        }
+
+        private static void HandlePagingHotkeyPress()
+        {
+            float now = Time.unscaledTime;
+            if (now < nextPageSwapAllowedTime)
+            {
+                AuditPagingInputGate("page_swap_cooldown");
+                return;
+            }
+
+            Audit(string.Format(CultureInfo.InvariantCulture,
+                "op=player.settings.hotkey_input hotkey={0} delta=1", configuredSwapHotkey));
+            if (!TryMovePage(1))
+            {
+                if (PageCount() <= 1 || currentPage == 0 || !TrySwitchToPage(0))
+                    return;
+            }
+
+            float intervalMilliseconds = lastSuccessfulPageSwapTime < 0f
+                ? -1f
+                : (now - lastSuccessfulPageSwapTime) * 1000f;
+            lastSuccessfulPageSwapTime = now;
+            nextPageSwapAllowedTime = now + PageSwapCooldownSeconds;
+            ShowSwapNotice();
+            Audit(string.Format(CultureInfo.InvariantCulture,
+                "op=player.settings.page_swap_guard hotkey={0} cooldownMs={1:0} intervalMs={2:0.0}",
+                configuredSwapHotkey, PageSwapCooldownSeconds * 1000f, intervalMilliseconds));
         }
 
         public static void HandleCanonicalPagingCallback(int delta)
@@ -353,42 +371,6 @@ namespace ScheduleIControlBridge
         {
             return PatchActive && PersistenceReady && EligibilityActive && InventoryReady
                 && !saveUnsafe && PageCount() > 1;
-        }
-
-        private static void EnsureCanonicalKeyboardPagingBindings()
-        {
-            if (canonicalKeyboardBindingsApplied || GameInput.Instance == null)
-                return;
-            InputAction left = GameInput.Instance.GetAction(GameInput.ButtonCode.InventoryLeft);
-            InputAction right = GameInput.Instance.GetAction(GameInput.ButtonCode.InventoryRight);
-            if (left == null || right == null)
-                return;
-            bool leftAdded = EnsureCanonicalKeyboardBinding(left, "<Keyboard>/leftArrow");
-            bool rightAdded = EnsureCanonicalKeyboardBinding(right, "<Keyboard>/rightArrow");
-            canonicalKeyboardBindingsApplied = true;
-            Audit(string.Format(CultureInfo.InvariantCulture,
-                "op=player.settings.canonical_input_binding_sync leftAdded={0} rightAdded={1} leftBindings={2} rightBindings={3}",
-                leftAdded, rightAdded, DescribeBindings(left), DescribeBindings(right)));
-        }
-
-        private static bool EnsureCanonicalKeyboardBinding(InputAction action, string path)
-        {
-            for (int i = 0; i < action.bindings.Count; i++)
-                if (string.Equals(action.bindings[i].effectivePath, path, StringComparison.OrdinalIgnoreCase))
-                    return false;
-            bool wasEnabled = action.enabled;
-            if (wasEnabled)
-                action.Disable();
-            try
-            {
-                InputActionSetupExtensions.AddBinding(action, path, null, null, null);
-            }
-            finally
-            {
-                if (wasEnabled)
-                    action.Enable();
-            }
-            return true;
         }
 
         public static void AuditBridgeInputBoundary(string phase)
@@ -526,6 +508,7 @@ namespace ScheduleIControlBridge
             {
                 ConfiguredInventoryMode = configuredInventoryMode,
                 ConfiguredSpeedMultiplier = configuredSpeedMultiplier,
+                ConfiguredSwapHotkey = configuredSwapHotkey,
                 BaseInventorySlots = InventoryPagingModel.NativePageWidth,
                 InventorySlotCount = InventoryPagingModel.NativePageWidth * pages,
                 InventoryPage = Math.Min(currentPage, Math.Max(0, pages - 1)),
@@ -542,7 +525,7 @@ namespace ScheduleIControlBridge
             };
         }
 
-        public static bool ApplySettings(int inventoryMode, float speedMultiplier, out string error)
+        public static bool ApplySettings(int inventoryMode, float speedMultiplier, string swapHotkey, out string error)
         {
             error = null;
             if (!PersistenceReady || !PatchActive)
@@ -550,14 +533,16 @@ namespace ScheduleIControlBridge
                 error = "Player runtime settings are unavailable on this game build.";
                 return false;
             }
-            if (!IsValidInventoryMode(inventoryMode) || !IsValidSpeed(speedMultiplier))
+            if (!IsValidInventoryMode(inventoryMode) || !IsValidSpeed(speedMultiplier)
+                || !InventoryPagingModel.TryNormalizeSwapHotkey(swapHotkey, out string normalizedSwapHotkey))
             {
-                error = "Inventory mode or player speed is outside the allowed range.";
+                error = "Inventory mode, player speed, or inventory swap hotkey is outside the allowed range.";
                 return false;
             }
 
             int oldMode = configuredInventoryMode;
             float oldSpeed = configuredSpeedMultiplier;
+            string oldSwapHotkey = configuredSwapHotkey;
             long oldConfigRevision = ConfigRevision;
             int oldPage = currentPage;
             int oldAllocated = allocatedPageCount;
@@ -583,12 +568,14 @@ namespace ScheduleIControlBridge
                 JObject candidate = (JObject)root.DeepClone();
                 candidate["inventoryMode"] = inventoryMode;
                 candidate["speedMultiplier"] = speedMultiplier;
+                candidate["swapHotkey"] = normalizedSwapHotkey;
                 candidate["updatedUtc"] = DateTime.UtcNow.ToString("o", CultureInfo.InvariantCulture);
                 SaveRootAtomically(candidate);
                 configSaved = true;
                 root = candidate;
                 configuredInventoryMode = inventoryMode;
                 configuredSpeedMultiplier = speedMultiplier;
+                SetConfiguredSwapHotkey(normalizedSwapHotkey);
                 // Retain the bounded saved bank across mode changes. The mode
                 // controls how many pages are addressable now; it never deletes
                 // higher-page ItemSets that the user may expose again later.
@@ -597,7 +584,7 @@ namespace ScheduleIControlBridge
                 string commitError;
                 if (!InventoryPagingModel.TryCommitAfterPersistence(
                     FlushSidecar,
-                    () => Audit(string.Format(CultureInfo.InvariantCulture, "op=player.settings.apply inventoryMode={0} speedMultiplier={1:0.###} nativeWidth={2} configRevision={3}", configuredInventoryMode, configuredSpeedMultiplier, InventoryPagingModel.NativePageWidth, committedRevision)),
+                    () => Audit(string.Format(CultureInfo.InvariantCulture, "op=player.settings.apply inventoryMode={0} speedMultiplier={1:0.###} swapHotkey={2} nativeWidth={3} configRevision={4}", configuredInventoryMode, configuredSpeedMultiplier, configuredSwapHotkey, InventoryPagingModel.NativePageWidth, committedRevision)),
                     ref committedRevision,
                     out commitError))
                     throw new InvalidOperationException(string.IsNullOrEmpty(lastInventoryError) ? commitError : lastInventoryError);
@@ -609,6 +596,7 @@ namespace ScheduleIControlBridge
             {
                 configuredInventoryMode = oldMode;
                 configuredSpeedMultiplier = oldSpeed;
+                SetConfiguredSwapHotkey(oldSwapHotkey);
                 ConfigRevision = oldConfigRevision;
                 currentPage = oldPage;
                 allocatedPageCount = oldAllocated;
@@ -895,7 +883,6 @@ namespace ScheduleIControlBridge
                     lastInventoryError = string.Empty;
                     Audit(string.Format(CultureInfo.InvariantCulture, "op=player.settings.inventory_ready inventoryReady=true nativeHotbarSlots={0} slotUiCount={1} currentPage={2} allocatedPageCount={3} saveScope={4} sidecarLoaded={5}", InventoryPagingModel.NativePageWidth, inventory.SlotUIs.Count, currentPage, allocatedPageCount, activeSaveScope, sidecarLoaded));
                 }
-                EnsureCanonicalKeyboardPagingBindings();
                 EnsureSwapNotice();
             }
             catch (Exception ex)
@@ -1066,7 +1053,10 @@ namespace ScheduleIControlBridge
             if (inventory != null)
             {
                 if (inventory.Equippable != null)
+                {
+                    inventory.Equippable.Unequip();
                     inventory.SetEquippable(null);
+                }
                 inventory.EquippedSlotIndex = -1;
                 inventory.PriorEquippedSlotIndex = -1;
                 inventory.PreviousEquippedSlotIndex = -1;
@@ -1352,32 +1342,13 @@ namespace ScheduleIControlBridge
                     reason = "inventory_unavailable";
                     return true;
                 }
-                if (!activeInventory.HotbarEnabled || !activeInventory.EquippingEnabled)
-                {
-                    reason = "hotbar_disabled";
-                    return true;
-                }
-                if (activeInventory.AttachedScreen != null)
-                {
-                    reason = "incompatible_screen";
-                    return true;
-                }
                 EventSystem eventSystem = EventSystem.current;
                 if (eventSystem == null)
-                {
-                    reason = "event_system_unavailable";
-                    return true;
-                }
+                    return false;
                 GameObject selected = eventSystem.currentSelectedGameObject;
                 if (selected == null)
                     return false;
-                if (selected.name.IndexOf("input", StringComparison.OrdinalIgnoreCase) >= 0
-                    || selected.name.IndexOf("text", StringComparison.OrdinalIgnoreCase) >= 0)
-                {
-                    reason = "typing_selected_object";
-                    return true;
-                }
-                Component[] components = selected.GetComponents<Component>();
+                Component[] components = selected.GetComponentsInParent<Component>(true);
                 for (int i = 0; i < components.Length; i++)
                     if (components[i] != null && components[i].GetType().Name.IndexOf("InputField", StringComparison.OrdinalIgnoreCase) >= 0)
                     {
@@ -1536,10 +1507,6 @@ namespace ScheduleIControlBridge
                 lastPagingInputGate = string.Empty;
                 lastPagingInputComponents = string.Empty;
                 lastCanonicalInputState = string.Empty;
-                canonicalKeyboardBindingsApplied = false;
-                pagingInputSampleKnown = false;
-                lastPagingLeft = false;
-                lastPagingRight = false;
                 nextPageSwapAllowedTime = 0f;
                 lastSuccessfulPageSwapTime = -1f;
             }
@@ -1559,6 +1526,18 @@ namespace ScheduleIControlBridge
         private static bool IsValidSpeed(float value) { return !float.IsNaN(value) && !float.IsInfinity(value) && value >= MinimumSpeed && value <= MaximumSpeed; }
         private static float ClampSpeed(float value) { return float.IsNaN(value) || float.IsInfinity(value) ? 1f : Math.Max(MinimumSpeed, Math.Min(MaximumSpeed, value)); }
 
+        private static void SetConfiguredSwapHotkey(string value)
+        {
+            if (!InventoryPagingModel.TryNormalizeSwapHotkey(value, out string normalized)
+                || !Enum.TryParse(normalized, true, out Key parsed))
+            {
+                normalized = InventoryPagingModel.DefaultSwapHotkey;
+                parsed = Key.RightArrow;
+            }
+            configuredSwapHotkey = normalized;
+            configuredSwapKey = parsed;
+        }
+
         private static JObject CreateEmptyRoot()
         {
             return new JObject
@@ -1568,6 +1547,7 @@ namespace ScheduleIControlBridge
                 ["gameBuild"] = GameOperations.ExpectedGameBuild,
                 ["inventoryMode"] = InventoryModeSingle,
                 ["speedMultiplier"] = 1f,
+                ["swapHotkey"] = InventoryPagingModel.DefaultSwapHotkey,
                 ["updatedUtc"] = DateTime.UtcNow.ToString("o", CultureInfo.InvariantCulture)
             };
         }
@@ -1622,6 +1602,7 @@ namespace ScheduleIControlBridge
     {
         public int ConfiguredInventoryMode;
         public float ConfiguredSpeedMultiplier;
+        public string ConfiguredSwapHotkey;
         public int BaseInventorySlots;
         public int InventorySlotCount;
         public int InventoryPage;
@@ -1644,6 +1625,7 @@ namespace ScheduleIControlBridge
                 ["configuredInventoryMode"] = ConfiguredInventoryMode,
                 ["speedMultiplier"] = PlayerSpeedMultiplier,
                 ["configuredSpeedMultiplier"] = ConfiguredSpeedMultiplier,
+                ["swapHotkey"] = ConfiguredSwapHotkey ?? InventoryPagingModel.DefaultSwapHotkey,
                 ["baseInventorySlots"] = InventoryPagingModel.NativePageWidth,
                 ["nativeHotbarSlots"] = NativeHotbarSlots,
                 ["inventoryReady"] = InventoryReady,
@@ -1686,7 +1668,6 @@ namespace ScheduleIControlBridge
         private static bool Prefix()
         {
             PlayerRuntimeSettings.AuditCanonicalInputCallback("left_prefix");
-            PlayerRuntimeSettings.HandleCanonicalPagingCallback(-1);
             return !PlayerRuntimeSettings.ShouldSuppressNativeInventoryNavigation();
         }
         private static void Postfix() { PlayerRuntimeSettings.AuditCanonicalInputCallback("left_postfix"); }
@@ -1698,7 +1679,6 @@ namespace ScheduleIControlBridge
         private static bool Prefix()
         {
             PlayerRuntimeSettings.AuditCanonicalInputCallback("right_prefix");
-            PlayerRuntimeSettings.HandleCanonicalPagingCallback(1);
             return !PlayerRuntimeSettings.ShouldSuppressNativeInventoryNavigation();
         }
         private static void Postfix() { PlayerRuntimeSettings.AuditCanonicalInputCallback("right_postfix"); }
