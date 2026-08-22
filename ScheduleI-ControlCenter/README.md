@@ -1,7 +1,7 @@
 # Schedule I Control Center source
 
 This directory contains the complete Intelligence Database source for Schedule
-I Control Center V2.
+I Control Center V2.1.
 
 ## Layout
 

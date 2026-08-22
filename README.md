@@ -1,14 +1,14 @@
-# Schedule I Control Center V2
+# Schedule I Control Center V2.1
 
 Schedule I Control Center is a Windows companion application for reviewed live
 controls and guarded offline save tools, presented in the Intelligence Database
 visual identity.
 
-V2 introduces the redesigned control-center interface, clearer workspace
+V2.1 combines the redesigned control-center interface, clearer workspace
 navigation, the Intelligence Database startup sequence, expanded diagnostics,
 one-click attach-and-launch packaging, and guarded GitHub Release updates.
 
-> Read [RELEASE_NOTES_V2.md](RELEASE_NOTES_V2.md) for the complete V2 summary.
+> Read [RELEASE_NOTES_V2.1.md](RELEASE_NOTES_V2.1.md) for the complete V2.1 summary.
 
 The complete Intelligence Database source for the launcher, graphical
 application, command-line application, live bridge, protocol, and regression
@@ -17,7 +17,7 @@ tests is published under the [MIT licence](LICENSE) in
 
 ## Install and launch
 
-1. Download and extract the V2 package outside the Schedule I installation.
+1. Download and extract the V2.1 package outside the Schedule I installation.
 2. Run the root `ScheduleIControlCenter.exe`.
 3. Confirm the detected Schedule I folder when prompted.
 4. The launcher attaches the packaged runtime and opens the Control Center.
@@ -28,7 +28,7 @@ The root launcher does not require elevation, modify saves, delete files, or
 contact a network service. It copies only the packaged runtime into the
 confirmed game folder and records an install summary for troubleshooting.
 
-## V2 workspaces
+## V2.1 workspaces
 
 - **Overview** — readiness, recommended workspaces, and ordered command logs.
 - **Market intelligence** — fair-value synchronization, sell-price and deal
@@ -39,7 +39,7 @@ confirmed game folder and records an install summary for troubleshooting.
 - **Drug effects** — supported product and effect workflows.
 - **Save & safety** — backup, validation, console enablement, and protected
   offline operations.
-- **Updates** — automatic stable-release checks, cached offline metadata,
+- **Version & Updates** — installed-version identity, automatic stable-release checks, cached offline metadata,
   release notes, verified full-package download, and transactional install.
 - **Help center** — quick-start guidance, terminology, safety rules, rollback,
   and common troubleshooting steps.
@@ -60,7 +60,7 @@ apply creates a full backup and validates the affected JSON before replacement.
 The local bridge is same-user, one-client, allowlisted, and versioned; it does
 not expose TCP/HTTP access or arbitrary command execution.
 
-V2 keeps deal totals and product unit prices as separate controls. Eligible
+V2.1 keeps deal totals and product unit prices as separate controls. Eligible
 solo-host workflows can raise the reviewed vanilla bounds through the exact
 technical maximum of `$16,777,215`, with preview and verification gates.
 
@@ -93,7 +93,7 @@ after the user selects **Download and install**. See
 [PRIVACY.md](PRIVACY.md), [SECURITY.md](SECURITY.md), and the
 [code signing policy](SIGNING_POLICY.md).
 
-## Application updates
+## Version & application updates
 
 Updates are sourced only from stable, versioned GitHub Releases in this public
 repository. The Control Center accepts the documented complete-package asset,
@@ -109,7 +109,7 @@ release must use a newer semantic version tag for installed copies to detect it.
 
 ## Release identity
 
-- Control Center: **V2** (`2.0.1.0`)
+- Control Center: **V2.1** (`2.1.0.0`)
 - Bridge: **v1.1.0**
 - Reviewed Schedule I build: **0.4.6f13**
 
