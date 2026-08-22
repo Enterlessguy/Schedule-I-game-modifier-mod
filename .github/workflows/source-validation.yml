@@ -1,0 +1,66 @@
+name: Source validation
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  windows-build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build Control Center and CLI
+        shell: cmd
+        working-directory: ScheduleI-ControlCenter
+        run: build.cmd
+
+      - name: Build regression tests
+        shell: cmd
+        working-directory: ScheduleI-ControlCenter
+        run: build-tests.cmd
+
+      - name: Run regression tests
+        shell: pwsh
+        working-directory: ScheduleI-ControlCenter
+        run: .\tests\bin\SmokeTests.exe
+
+      - name: Build attach launcher
+        shell: cmd
+        working-directory: ScheduleI-ControlCenter/launcher
+        run: build-launcher.cmd
+
+      - name: Guard native runtime boundaries
+        shell: pwsh
+        run: |
+          $files = @(
+            'ScheduleI-ControlCenter/mod/ScheduleIControlBridge/GameOperations.cs',
+            'ScheduleI-ControlCenter/mod/ScheduleIControlBridge/SellPriceLimitManager.cs'
+          )
+          $matches = $files | Select-String -Pattern 'ProductManager\.(MIN_PRICE|MAX_PRICE)'
+          if ($matches) {
+            $matches | ForEach-Object { Write-Error ("Unsafe native price-bound access in {0}:{1}" -f $_.Path, $_.LineNumber) }
+            exit 1
+          }
+
+      - name: Reject private material
+        shell: pwsh
+        run: |
+          $patterns = @(
+            '-----BEGIN [A-Z ]*PRIVATE KEY-----',
+            'github_pat_[A-Za-z0-9_]{20,}',
+            'gh[pousr]_[A-Za-z0-9_]{20,}',
+            'AKIA[0-9A-Z]{16}',
+            'C:\\Users\\[^\\\s"'']+',
+            '\b7656119[0-9]{10}\b'
+          )
+          $files = git ls-files -- '*.cs' '*.cmd' '*.md' '*.manifest' '*.json' '*.yml' '*.yaml' '*.ps1'
+          $matches = $files | Select-String -Pattern $patterns
+          if ($matches) {
+            $matches | ForEach-Object { Write-Error ("Private-material pattern in {0}:{1}" -f $_.Path, $_.LineNumber) }
+            exit 1
+          }

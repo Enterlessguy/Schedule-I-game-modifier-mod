@@ -10,6 +10,11 @@ and a one-click attach-and-launch package.
 
 > Read [RELEASE_NOTES_V2.md](RELEASE_NOTES_V2.md) for the complete V2 summary.
 
+The complete Intelligence Database source for the launcher, graphical
+application, command-line application, live bridge, protocol, and regression
+tests is published under the [MIT licence](LICENSE) in
+[`ScheduleI-ControlCenter/`](ScheduleI-ControlCenter/).
+
 ## Install and launch
 
 1. Download and extract the V2 package outside the Schedule I installation.
@@ -75,6 +80,12 @@ common credential material.
 If attachment fails, confirm that the package was fully extracted, rerun the
 root launcher outside the game directory, and verify that Steam's Schedule I
 installation is accessible to the current Windows user.
+
+## Trust and privacy
+
+The application operates locally and does not transmit user information. See
+[PRIVACY.md](PRIVACY.md), [SECURITY.md](SECURITY.md), and the
+[code signing policy](SIGNING_POLICY.md).
 
 ## Release identity
 

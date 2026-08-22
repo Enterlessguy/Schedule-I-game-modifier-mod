@@ -1,0 +1,14 @@
+**/bin/
+**/obj/
+*.log
+*.tmp
+*.user
+*.suo
+
+ScheduleI-ControlCenter/Backups/
+ScheduleI-ControlCenter/Data/
+ScheduleI-ControlCenter/InstallRecords/
+ScheduleI-ControlCenter/release/
+ScheduleI-ControlCenter/.tmp-inspect/
+ScheduleI-ControlCenter/sicc-*.txt
+UserData/ScheduleIControlBridge.*.json
