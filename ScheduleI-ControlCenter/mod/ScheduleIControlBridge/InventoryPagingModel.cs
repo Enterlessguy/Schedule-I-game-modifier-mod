@@ -9,7 +9,9 @@ namespace ScheduleIControlBridge
     {
         public const int NativePageWidth = 8;
         public const int Mode4PageCap = 8;
-        public const string DefaultSwapHotkey = "RightArrow";
+        public const string DefaultLeftSwapHotkey = "LeftArrow";
+        public const string DefaultRightSwapHotkey = "RightArrow";
+        public const string DefaultSwapHotkey = DefaultRightSwapHotkey;
 
         private static readonly HashSet<string> SupportedSwapHotkeys = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
         {
@@ -38,6 +40,15 @@ namespace ScheduleIControlBridge
                 return true;
             }
             return false;
+        }
+
+        public static bool TryNormalizeSwapHotkeyPair(string leftValue, string rightValue, out string normalizedLeft, out string normalizedRight)
+        {
+            normalizedLeft = null;
+            normalizedRight = null;
+            return TryNormalizeSwapHotkey(leftValue, out normalizedLeft)
+                && TryNormalizeSwapHotkey(rightValue, out normalizedRight)
+                && !string.Equals(normalizedLeft, normalizedRight, StringComparison.OrdinalIgnoreCase);
         }
 
         public static int ConfiguredPageCountForMode(int mode)
