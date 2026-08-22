@@ -15,6 +15,7 @@ if not exist "%ROOT%dist" mkdir "%ROOT%dist"
 
 "%CSC%" /nologo /target:winexe /platform:x64 /langversion:latest /optimize+ /deterministic+ ^
   /win32manifest:"%ROOT%src\app.manifest" ^
+  /win32icon:"%ROOT%src\assets\app.ico" ^
   /resource:"%ROOT%src\assets\IntelDatabasepagelogo.png",ScheduleIControlCenter.IntelDatabaseLogo.png ^
   /resource:"%ROOT%src\assets\font.ttf",ScheduleIControlCenter.WelcomeFont.ttf ^
   /out:"%ROOT%dist\ScheduleIControlCenter.exe" ^
@@ -40,6 +41,7 @@ if not exist "%ROOT%dist" mkdir "%ROOT%dist"
 if errorlevel 1 exit /b %errorlevel%
 
 "%CSC%" /nologo /target:exe /platform:x64 /langversion:latest /optimize+ /deterministic+ ^
+  /win32icon:"%ROOT%src\assets\app.ico" ^
   /out:"%ROOT%dist\ScheduleIControlCenter.Cli.exe" ^
   /reference:"%FX%\System.dll" ^
   /reference:"%FX%\System.Core.dll" ^

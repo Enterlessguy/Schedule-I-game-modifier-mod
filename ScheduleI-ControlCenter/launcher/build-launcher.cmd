@@ -15,6 +15,7 @@ if not exist "%ROOT%bin" mkdir "%ROOT%bin"
 
 "%CSC%" /nologo /target:winexe /platform:x64 /langversion:latest /optimize+ /deterministic+ ^
   /win32manifest:"%ROOT%app.manifest" ^
+  /win32icon:"%ROOT%..\src\assets\app.ico" ^
   /out:"%ROOT%bin\ScheduleIControlCenter.exe" ^
   /reference:"%FX%\System.dll" ^
   /reference:"%FX%\System.Core.dll" ^
