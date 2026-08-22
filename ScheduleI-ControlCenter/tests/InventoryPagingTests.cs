@@ -46,13 +46,17 @@ namespace ScheduleIControlCenter
 
         private static void SwapHotkeysAreNormalizedAndBounded()
         {
-            Require(InventoryPagingModel.DefaultSwapHotkey == "RightArrow", "right arrow remains the default swap hotkey");
+            Require(InventoryPagingModel.DefaultLeftSwapHotkey == "LeftArrow", "left arrow is the default previous-page hotkey");
+            Require(InventoryPagingModel.DefaultRightSwapHotkey == "RightArrow", "right arrow is the default next-page hotkey");
             Require(InventoryPagingModel.TryNormalizeSwapHotkey(" rightarrow ", out string arrow) && arrow == "RightArrow", "hotkey normalization is case-insensitive and trimmed");
             Require(InventoryPagingModel.TryNormalizeSwapHotkey("F12", out string function) && function == "F12", "function hotkey is accepted");
             Require(InventoryPagingModel.TryNormalizeSwapHotkey("Numpad7", out string numpad) && numpad == "Numpad7", "numpad hotkey is accepted");
             Require(!InventoryPagingModel.TryNormalizeSwapHotkey("LeftCtrl", out string modifier), "modifier-only hotkey is rejected");
             Require(!InventoryPagingModel.TryNormalizeSwapHotkey("Escape", out string escape), "escape stays reserved for capture cancellation");
             Require(!InventoryPagingModel.TryNormalizeSwapHotkey("not-a-key", out string invalid), "unknown hotkey is rejected");
+            Require(InventoryPagingModel.TryNormalizeSwapHotkeyPair("leftarrow", "RIGHTARROW", out string left, out string right)
+                && left == "LeftArrow" && right == "RightArrow", "left/right hotkey pair is normalized independently");
+            Require(!InventoryPagingModel.TryNormalizeSwapHotkeyPair("F6", "f6", out left, out right), "duplicate directional hotkeys are rejected");
         }
 
         private static void FixedModesAllocateAndPersistAllConfiguredPages()

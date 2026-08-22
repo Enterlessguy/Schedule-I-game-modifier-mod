@@ -47,8 +47,10 @@ namespace ScheduleIControlCenter
         private readonly Label inventoryModeValue = new Label();
         private readonly NumericUpDown playerSpeedInput = new IntelNumericUpDown();
         private readonly Label playerSpeedPreviewValue = new Label();
-        private readonly Button playerSwapHotkeyButton = new IntelButton();
-        private readonly Label playerSwapHotkeyValue = new Label();
+        private readonly Button playerLeftSwapHotkeyButton = new IntelButton();
+        private readonly Label playerLeftSwapHotkeyValue = new Label();
+        private readonly Button playerRightSwapHotkeyButton = new IntelButton();
+        private readonly Label playerRightSwapHotkeyValue = new Label();
         private readonly Button playerInventoryRefreshButton = new IntelButton();
         private readonly Button playerInventoryPreviewButton = new IntelButton();
         private readonly Button playerInventoryApplyButton = new IntelButton();
@@ -60,15 +62,16 @@ namespace ScheduleIControlCenter
         private string playerPreviewId = string.Empty;
         private long playerPreviewRevision;
         private long playerPreviewConfigRevision;
-        private string playerSwapHotkey = "RightArrow";
-        private bool playerSwapHotkeyCaptureActive;
+        private string playerLeftSwapHotkey = "LeftArrow";
+        private string playerRightSwapHotkey = "RightArrow";
+        private int playerSwapHotkeyCaptureDirection;
 
         private TabPage BuildPlayerPage()
         {
             TabPage page = NewPage("Player");
             TableLayoutPanel layout = PageLayout(3);
             layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 184));
-            layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 298));
+            layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 352));
             layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 132));
             page.Controls.Add(layout);
 
@@ -85,7 +88,8 @@ namespace ScheduleIControlCenter
             layout.Controls.Add(intro, 0, 0);
 
             GroupBox settings = NewGroup("Player settings");
-            TableLayoutPanel body = new TableLayoutPanel { Dock = DockStyle.Fill, RowCount = 3, ColumnCount = 1, Padding = new Padding(12, 8, 12, 8), BackColor = Surface };
+            TableLayoutPanel body = new TableLayoutPanel { Dock = DockStyle.Fill, RowCount = 4, ColumnCount = 1, Padding = new Padding(12, 8, 12, 8), BackColor = Surface };
+            body.RowStyles.Add(new RowStyle(SizeType.Absolute, 54));
             body.RowStyles.Add(new RowStyle(SizeType.Absolute, 54));
             body.RowStyles.Add(new RowStyle(SizeType.Absolute, 54));
             body.RowStyles.Add(new RowStyle(SizeType.Absolute, 54));
@@ -117,23 +121,8 @@ namespace ScheduleIControlCenter
             AddPlayerButtons(inventoryRow, playerInventoryRefreshButton, playerInventoryPreviewButton, playerInventoryApplyButton);
             body.Controls.Add(inventoryRow, 0, 0);
 
-            TableLayoutPanel hotkeyRow = MakePlayerControlRow();
-            Label hotkeyLabel = FieldLabel("Swap hotkey");
-            hotkeyLabel.Dock = DockStyle.Fill;
-            hotkeyRow.Controls.Add(hotkeyLabel, 0, 0);
-            playerSwapHotkeyButton.Text = HotkeyDisplayName(playerSwapHotkey);
-            StyleButton(playerSwapHotkeyButton, false);
-            playerSwapHotkeyButton.Click += delegate { BeginPlayerSwapHotkeyCapture(); };
-            playerSwapHotkeyButton.PreviewKeyDown += delegate(object sender, PreviewKeyDownEventArgs e) { e.IsInputKey = true; };
-            playerSwapHotkeyButton.KeyDown += PlayerSwapHotkeyButton_KeyDown;
-            hotkeyRow.Controls.Add(MakeCenteredPlayerControl(playerSwapHotkeyButton, 38), 1, 0);
-            playerSwapHotkeyValue.AutoSize = false;
-            playerSwapHotkeyValue.Dock = DockStyle.Fill;
-            playerSwapHotkeyValue.Text = "Click the button, then press a key. Works during storage and phone use.";
-            playerSwapHotkeyValue.TextAlign = ContentAlignment.MiddleLeft;
-            playerSwapHotkeyValue.ForeColor = Muted;
-            hotkeyRow.Controls.Add(playerSwapHotkeyValue, 2, 0);
-            body.Controls.Add(hotkeyRow, 0, 1);
+            body.Controls.Add(BuildPlayerHotkeyRow("Previous page", playerLeftSwapHotkeyButton, playerLeftSwapHotkeyValue, -1), 0, 1);
+            body.Controls.Add(BuildPlayerHotkeyRow("Next page", playerRightSwapHotkeyButton, playerRightSwapHotkeyValue, 1), 0, 2);
 
             TableLayoutPanel speedRow = MakePlayerControlRow();
             Label speedLabel = FieldLabel("Speed multiplier");
@@ -158,7 +147,7 @@ namespace ScheduleIControlCenter
             playerSpeedPreviewValue.ForeColor = Muted;
             speedRow.Controls.Add(playerSpeedPreviewValue, 2, 0);
             AddPlayerButtons(speedRow, playerSpeedRefreshButton, playerSpeedPreviewButton, playerSpeedApplyButton);
-            body.Controls.Add(speedRow, 0, 2);
+            body.Controls.Add(speedRow, 0, 3);
             settings.Controls.Add(body);
             layout.Controls.Add(settings, 0, 1);
 
@@ -245,39 +234,70 @@ namespace ScheduleIControlCenter
             panel.Controls.Add(MakePlayerButtonCell(apply), 5, 0);
         }
 
-        private void BeginPlayerSwapHotkeyCapture()
+        private TableLayoutPanel BuildPlayerHotkeyRow(string labelText, Button button, Label valueLabel, int direction)
+        {
+            TableLayoutPanel row = MakePlayerControlRow();
+            Label label = FieldLabel(labelText);
+            label.Dock = DockStyle.Fill;
+            row.Controls.Add(label, 0, 0);
+            button.Text = HotkeyDisplayName(direction < 0 ? playerLeftSwapHotkey : playerRightSwapHotkey);
+            StyleButton(button, false);
+            button.Click += delegate { BeginPlayerSwapHotkeyCapture(direction); };
+            button.PreviewKeyDown += delegate(object sender, PreviewKeyDownEventArgs e) { e.IsInputKey = true; };
+            button.KeyDown += delegate(object sender, KeyEventArgs e) { PlayerSwapHotkeyButton_KeyDown(e, direction); };
+            row.Controls.Add(MakeCenteredPlayerControl(button, 38), 1, 0);
+            valueLabel.AutoSize = false;
+            valueLabel.Dock = DockStyle.Fill;
+            valueLabel.Text = "Click the button, then press a key. Works during storage and phone use.";
+            valueLabel.TextAlign = ContentAlignment.MiddleLeft;
+            valueLabel.ForeColor = Muted;
+            row.Controls.Add(valueLabel, 2, 0);
+            return row;
+        }
+
+        private void BeginPlayerSwapHotkeyCapture(int direction)
         {
             if (playerBusy)
                 return;
-            playerSwapHotkeyCaptureActive = true;
-            playerSwapHotkeyButton.Text = "Press a key…";
-            playerSwapHotkeyValue.Text = "Press Escape to cancel. Modifier-only keys are intentionally excluded.";
-            playerSwapHotkeyButton.Focus();
+            playerSwapHotkeyCaptureDirection = direction;
+            Button button = direction < 0 ? playerLeftSwapHotkeyButton : playerRightSwapHotkeyButton;
+            Label valueLabel = direction < 0 ? playerLeftSwapHotkeyValue : playerRightSwapHotkeyValue;
+            button.Text = "Press a key…";
+            valueLabel.Text = "Press Escape to cancel. Modifier-only keys are intentionally excluded.";
+            button.Focus();
         }
 
-        private void PlayerSwapHotkeyButton_KeyDown(object sender, KeyEventArgs e)
+        private void PlayerSwapHotkeyButton_KeyDown(KeyEventArgs e, int direction)
         {
-            if (!playerSwapHotkeyCaptureActive)
+            if (playerSwapHotkeyCaptureDirection != direction)
                 return;
+            Button button = direction < 0 ? playerLeftSwapHotkeyButton : playerRightSwapHotkeyButton;
+            Label valueLabel = direction < 0 ? playerLeftSwapHotkeyValue : playerRightSwapHotkeyValue;
+            string current = direction < 0 ? playerLeftSwapHotkey : playerRightSwapHotkey;
             e.Handled = true;
             e.SuppressKeyPress = true;
             if (e.KeyCode == Keys.Escape)
             {
-                playerSwapHotkeyCaptureActive = false;
-                playerSwapHotkeyButton.Text = HotkeyDisplayName(playerSwapHotkey);
-                playerSwapHotkeyValue.Text = "Hotkey unchanged. Works during storage and phone use.";
+                playerSwapHotkeyCaptureDirection = 0;
+                button.Text = HotkeyDisplayName(current);
+                valueLabel.Text = "Hotkey unchanged. Works during storage and phone use.";
                 return;
             }
             if (!TryMapSwapHotkey(e.KeyCode, out string mapped))
             {
-                playerSwapHotkeyButton.Text = "Try another key…";
-                playerSwapHotkeyValue.Text = "That key cannot be used by the game input system.";
+                button.Text = "Try another key…";
+                valueLabel.Text = "That key cannot be used by the game input system.";
                 return;
             }
-            playerSwapHotkeyCaptureActive = false;
-            playerSwapHotkey = mapped;
-            playerSwapHotkeyButton.Text = HotkeyDisplayName(mapped);
-            playerSwapHotkeyValue.Text = "Upcoming: " + HotkeyDisplayName(mapped) + ". Preview and Apply to persist it.";
+            playerSwapHotkeyCaptureDirection = 0;
+            if (direction < 0)
+                playerLeftSwapHotkey = mapped;
+            else
+                playerRightSwapHotkey = mapped;
+            button.Text = HotkeyDisplayName(mapped);
+            valueLabel.Text = string.Equals(playerLeftSwapHotkey, playerRightSwapHotkey, StringComparison.OrdinalIgnoreCase)
+                ? "Choose a different key for each direction."
+                : "Upcoming: " + HotkeyDisplayName(mapped) + ". Preview and Apply to persist it.";
             InvalidatePlayerPreview();
         }
 
@@ -372,6 +392,11 @@ namespace ScheduleIControlCenter
         private async Task PreviewPlayerSettingsAsync()
         {
             InvalidatePlayerPreview();
+            if (string.Equals(playerLeftSwapHotkey, playerRightSwapHotkey, StringComparison.OrdinalIgnoreCase))
+            {
+                playerSummary.Text = "Previous page and Next page must use different hotkeys.";
+                return;
+            }
             SetPlayerBusy(true, "Building a revision-checked player settings preview...");
             try
             {
@@ -379,7 +404,8 @@ namespace ScheduleIControlCenter
                 {
                     { "inventoryMode", inventoryModeSlider.Value },
                     { "speedMultiplier", playerSpeedInput.Value },
-                    { "swapHotkey", playerSwapHotkey }
+                    { "leftSwapHotkey", playerLeftSwapHotkey },
+                    { "rightSwapHotkey", playerRightSwapHotkey }
                 }, true);
                 ShowResult(result);
                 if (!result.Success)
@@ -399,7 +425,7 @@ namespace ScheduleIControlCenter
         {
             if (playerPreviewId.Length == 0)
                 return;
-            if (!Confirm("Apply the virtual inventory-page, swap-hotkey, and player-speed preview? Page 0 remains the vanilla save surface."))
+            if (!Confirm("Apply the virtual inventory-page, left/right swap-hotkey, and player-speed preview? Page 0 remains the vanilla save surface."))
                 return;
             SetPlayerBusy(true, "Applying and persisting player settings...");
             try
@@ -431,14 +457,17 @@ namespace ScheduleIControlCenter
             if (mode < inventoryModeSlider.Minimum || mode > inventoryModeSlider.Maximum)
                 mode = 1;
             float speed = GetFloat(data, preview ? "newSpeedMultiplier" : "configuredSpeedMultiplier", 1f);
-            string swapHotkey = JsonUtil.GetString(data, preview ? "newSwapHotkey" : "swapHotkey", playerSwapHotkey);
+            string leftSwapHotkey = JsonUtil.GetString(data, preview ? "newLeftSwapHotkey" : "leftSwapHotkey", playerLeftSwapHotkey);
+            string rightSwapHotkey = JsonUtil.GetString(data, preview ? "newRightSwapHotkey" : "rightSwapHotkey", playerRightSwapHotkey);
             decimal boundedSpeed = Math.Max(playerSpeedInput.Minimum, Math.Min(playerSpeedInput.Maximum, (decimal)speed));
             if (!preview)
             {
                 inventoryModeSlider.Value = mode;
                 playerSpeedInput.Value = boundedSpeed;
-                playerSwapHotkey = swapHotkey;
-                playerSwapHotkeyButton.Text = HotkeyDisplayName(swapHotkey);
+                playerLeftSwapHotkey = leftSwapHotkey;
+                playerRightSwapHotkey = rightSwapHotkey;
+                playerLeftSwapHotkeyButton.Text = HotkeyDisplayName(leftSwapHotkey);
+                playerRightSwapHotkeyButton.Text = HotkeyDisplayName(rightSwapHotkey);
                 inventoryModeValue.Text = "Current: " + InventoryModeLabel(mode) + "  •  Upcoming: " + InventoryModeLabel(mode);
             }
             int slotCount = JsonUtil.GetInt(data, preview ? "newInventorySlotCount" : "inventorySlotCount", 0);
@@ -461,13 +490,14 @@ namespace ScheduleIControlCenter
             string capacity = mode == 4
                 ? string.Format(CultureInfo.CurrentCulture, "up to {0} slots", slotCount)
                 : string.Format(CultureInfo.CurrentCulture, "{0} slots", slotCount);
-            playerSummary.Text = string.Format(CultureInfo.CurrentCulture, "{0}: inventory {1} ({2}, {3} configured page{4}; native surface {5}, page {6}, allocated {7}; {8}, {9}). Swap hotkey {10}. Speed {11:0.00}x.{12} {13}{14}", prefix, InventoryModeLabel(mode), capacity, pageCount, pagePlural, nativeSlots, page, allocatedPages, readiness, sidecar, HotkeyDisplayName(swapHotkey), speed, error, preview ? "Apply to activate." : "", scope);
+            playerSummary.Text = string.Format(CultureInfo.CurrentCulture, "{0}: inventory {1} ({2}, {3} configured page{4}; native surface {5}, page {6}, allocated {7}; {8}, {9}). Previous {10}; next {11}. Speed {12:0.00}x.{13} {14}{15}", prefix, InventoryModeLabel(mode), capacity, pageCount, pagePlural, nativeSlots, page, allocatedPages, readiness, sidecar, HotkeyDisplayName(leftSwapHotkey), HotkeyDisplayName(rightSwapHotkey), speed, error, preview ? "Apply to activate." : "", scope);
             string upcomingCapacity = mode == 4
                 ? string.Format(CultureInfo.CurrentCulture, "{0} (up to {1} slots; {2} page{3})", InventoryModeLabel(mode), slotCount, allocatedPages, allocatedPages == 1 ? string.Empty : "s")
                 : string.Format(CultureInfo.CurrentCulture, "{0} ({1} slots)", InventoryModeLabel(mode), slotCount);
             inventoryModeValue.Text = string.Format(CultureInfo.CurrentCulture, "Current: {0}  •  Upcoming: {1}", InventoryModeLabel(mode), upcomingCapacity);
             playerSpeedPreviewValue.Text = string.Format(CultureInfo.CurrentCulture, "Current: {0:0.00}x  •  Upcoming: {1:0.00}x", speed, speed);
-            playerSwapHotkeyValue.Text = (preview ? "Upcoming: " : "Current: ") + HotkeyDisplayName(swapHotkey) + ". Works during storage and phone use.";
+            playerLeftSwapHotkeyValue.Text = (preview ? "Upcoming: " : "Current: ") + HotkeyDisplayName(leftSwapHotkey) + ". Previous page; works during storage and phone use.";
+            playerRightSwapHotkeyValue.Text = (preview ? "Upcoming: " : "Current: ") + HotkeyDisplayName(rightSwapHotkey) + ". Next page; works during storage and phone use.";
         }
 
         private void SetPlayerBusy(bool busy, string message)
@@ -476,7 +506,8 @@ namespace ScheduleIControlCenter
             bool ready = !busy && bridgeConnected && soloHost;
             playerInventoryRefreshButton.Enabled = ready;
             playerSpeedRefreshButton.Enabled = ready;
-            playerSwapHotkeyButton.Enabled = !busy;
+            playerLeftSwapHotkeyButton.Enabled = !busy;
+            playerRightSwapHotkeyButton.Enabled = !busy;
             playerInventoryPreviewButton.Enabled = ready;
             playerSpeedPreviewButton.Enabled = ready;
             playerInventoryApplyButton.Enabled = ready && playerPreviewId.Length > 0;
