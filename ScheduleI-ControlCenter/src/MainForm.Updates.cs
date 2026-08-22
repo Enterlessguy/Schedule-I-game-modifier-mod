@@ -27,7 +27,7 @@ namespace ScheduleIControlCenter
 
         private TabPage BuildUpdatesPage()
         {
-            TabPage page = NewPage("Updates");
+            TabPage page = NewPage("Version & Updates");
             TableLayoutPanel layout = new TableLayoutPanel
             {
                 Dock = DockStyle.Fill,
@@ -41,7 +41,7 @@ namespace ScheduleIControlCenter
             layout.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
 
             Panel intro = new Panel { Dock = DockStyle.Fill, BackColor = AppBackground, Padding = new Padding(12, 8, 12, 8) };
-            Label title = new Label { Text = "Application updates", Dock = DockStyle.Top, Height = 36, Font = HeadingFont, ForeColor = Ink };
+            Label title = new Label { Text = "Version & Updates", Dock = DockStyle.Top, Height = 36, Font = HeadingFont, ForeColor = Ink };
             Label description = new Label
             {
                 Text = "Keep the complete Control Center package synchronized with stable Intelligence Database releases on GitHub.",
@@ -203,7 +203,7 @@ namespace ScheduleIControlCenter
             updateReleaseButton.Enabled = release != null && release.ReleasePageUri != null;
             updateNotes.Text = release == null || string.IsNullOrWhiteSpace(release.ReleaseNotes)
                 ? "No release notes were supplied for the latest stable release."
-                : release.ReleaseNotes.Trim();
+                : FormatReleaseNotesForDisplay(release.ReleaseNotes);
             DateTime checkedUtc = result == null ? DateTime.MinValue : result.CheckedUtc;
             updateChecked.Text = checkedUtc == DateTime.MinValue
                 ? (cached ? "Showing last-known release metadata." : "Release metadata retrieved.")
@@ -301,7 +301,7 @@ namespace ScheduleIControlCenter
                     DiagnosticsService.Record(new InvalidOperationException(failure), "update.previous-install",
                         DiagnosticCategory.Update, DiagnosticSeverity.Error,
                         "The previous application update was not installed.", "The existing installation was retained or restored.");
-                    MessageBox.Show(this, failure + "\n\nThe existing Control Center installation remains available. Open Updates to try again or Diagnostics for details.",
+                    MessageBox.Show(this, failure + "\n\nThe existing Control Center installation remains available. Open Version & Updates to try again or Diagnostics for details.",
                         "Update not applied", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     data["acknowledged"] = true;
                     JsonUtil.WriteObjectAtomic(path, data);
@@ -335,6 +335,28 @@ namespace ScheduleIControlCenter
             }
             if (result.Length == 0) result.Append("This release includes the latest Control Center improvements and fixes.");
             return result.Length <= 1500 ? result.ToString() : result.ToString(0, 1500) + "…";
+        }
+
+        private static string FormatReleaseNotesForDisplay(string notes)
+        {
+            StringBuilder result = new StringBuilder();
+            foreach (string raw in (notes ?? string.Empty).Replace("\r", string.Empty).Split('\n'))
+            {
+                string line = raw.Trim();
+                if (line.StartsWith("#", StringComparison.Ordinal))
+                    line = line.TrimStart('#').Trim();
+                else if (line.StartsWith("- ", StringComparison.Ordinal) || line.StartsWith("* ", StringComparison.Ordinal))
+                    line = "• " + line.Substring(2).Trim();
+                line = line.Replace("**", string.Empty).Replace("`", string.Empty);
+                if (line.Length == 0)
+                {
+                    if (result.Length > 0 && !result.ToString().EndsWith(Environment.NewLine + Environment.NewLine, StringComparison.Ordinal))
+                        result.AppendLine();
+                    continue;
+                }
+                result.AppendLine(line);
+            }
+            return result.ToString().Trim();
         }
 
         private sealed class UpdateWelcomeForm : Form

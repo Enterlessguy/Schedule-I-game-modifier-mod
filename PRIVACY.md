@@ -11,7 +11,7 @@ the user's IP address, to GitHub. It does not include the Windows user name,
 save paths or contents, diagnostic reports, command history, or settings.
 
 The latest stable release version, release notes, asset URL, size, and SHA-256
-digest are cached locally so the Updates page can show its last-known status
+digest are cached locally so the Version & Updates page can show its last-known status
 while offline. A release package is downloaded from GitHub only after the user
 selects **Download and install**. Update archives, verification metadata,
 managed-file manifests, rollback copies, and the last installation result are

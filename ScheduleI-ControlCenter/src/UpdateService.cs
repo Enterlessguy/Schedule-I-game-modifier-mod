@@ -417,7 +417,7 @@ namespace ScheduleIControlCenter
         private static bool IsAcceptedAssetName(string name)
         {
             return Regex.IsMatch(name ?? string.Empty,
-                "\\AScheduleI-Control-Center(?:-V[0-9]+)?\\.zip\\z",
+                "\\AScheduleI-Control-Center(?:-V[0-9]+(?:\\.[0-9]+)*)?\\.zip\\z",
                 RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
         }
 
@@ -642,7 +642,7 @@ namespace ScheduleIControlCenter
             string first = segments[0];
             if (segments.Length == 1)
             {
-                if (Regex.IsMatch(first, "\\ARELEASE_NOTES_V[0-9]+\\.md\\z", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant))
+                if (Regex.IsMatch(first, "\\ARELEASE_NOTES_V[0-9]+(?:[._][0-9]+)*\\.md\\z", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant))
                     return true;
                 return new[]
                 {

@@ -1,18 +1,18 @@
-# Schedule I Control Center V2
+# Schedule I Control Center V2.1
 
 ## Release summary
 
-V2 is the packaged Intelligence Database release of the Schedule I Control
+V2.1 is the packaged Intelligence Database release of the Schedule I Control
 Center. It combines the redesigned dark-blue control surface with the reviewed
 live bridge and offline save tools in one attach-and-launch package.
 
-## V2 package refresh
+## V2.1 package refresh
 
-### 2.0.1 — guarded application updates
+### 2.1.0 — guarded application updates
 
 - Added stable GitHub Release discovery, cached offline release metadata,
   verified full-package download, transactional synchronization, rollback, and
-  a dedicated Updates workspace.
+  a dedicated Version & Updates workspace.
 - Added a cube-branded post-update changelog screen.
 
 - Replaced the generic Windows executable icon with a crisp multi-resolution

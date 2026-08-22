@@ -34,14 +34,14 @@ namespace ScheduleIControlCenter
         private static void ReleaseMetadataValidation()
         {
             string digest = new string('a', 64);
-            string json = "{\"draft\":false,\"prerelease\":false,\"tag_name\":\"v2.0.1\","
-                + "\"html_url\":\"https://github.com/Enterlessguy/Schedule-I-game-modifier-mod/releases/tag/v2.0.1\","
-                + "\"body\":\"Update notes\",\"assets\":[{\"name\":\"ScheduleI-Control-Center-V2.zip\","
-                + "\"browser_download_url\":\"https://github.com/Enterlessguy/Schedule-I-game-modifier-mod/releases/download/v2.0.1/ScheduleI-Control-Center-V2.zip\","
+            string json = "{\"draft\":false,\"prerelease\":false,\"tag_name\":\"v2.1.0\","
+                + "\"html_url\":\"https://github.com/Enterlessguy/Schedule-I-game-modifier-mod/releases/tag/v2.1.0\","
+                + "\"body\":\"Update notes\",\"assets\":[{\"name\":\"ScheduleI-Control-Center-V2.1.zip\","
+                + "\"browser_download_url\":\"https://github.com/Enterlessguy/Schedule-I-game-modifier-mod/releases/download/v2.1.0/ScheduleI-Control-Center-V2.1.zip\","
                 + "\"digest\":\"sha256:" + digest + "\",\"size\":1234}]}";
             UpdateCheckResult newer = UpdateService.ParseLatestRelease(json, "2.0.0");
-            Require(newer.UpdateAvailable && newer.Release.VersionText == "2.0.1", "A newer stable release was not detected.");
-            Require(!UpdateService.ParseLatestRelease(json, "2.0.1").UpdateAvailable, "The installed release was incorrectly treated as outdated.");
+            Require(newer.UpdateAvailable && newer.Release.VersionText == "2.1.0", "A newer stable release was not detected.");
+            Require(!UpdateService.ParseLatestRelease(json, "2.1.0").UpdateAvailable, "The installed release was incorrectly treated as outdated.");
 
             string unsafeJson = json.Replace("https://github.com/Enterlessguy/Schedule-I-game-modifier-mod/releases/download/", "https://example.invalid/");
             RequireThrows<InvalidDataException>(() => UpdateService.ParseLatestRelease(unsafeJson, "2.0.0"), "An untrusted asset URL was accepted.");
