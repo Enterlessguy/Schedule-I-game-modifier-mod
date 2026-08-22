@@ -51,15 +51,15 @@ jobs:
         shell: pwsh
         run: |
           $patterns = @(
-            '-----BEGIN [A-Z ]*PRIVATE KEY-----',
-            'github_pat_[A-Za-z0-9_]{20,}',
-            'gh[pousr]_[A-Za-z0-9_]{20,}',
-            'AKIA[0-9A-Z]{16}',
-            'C:\\Users\\[^\\\s"'']+',
+            ('-----BEGIN ' + '[A-Z ]*PRIVATE KEY-----'),
+            ('github_' + 'pat_[A-Za-z0-9_]{20,}'),
+            ('gh' + '[pousr]_[A-Za-z0-9_]{20,}'),
+            ('AKIA' + '[0-9A-Z]{16}'),
+            ([regex]::Escape(('C:' + '\Users\')) + '[^\\\s"'']+'),
             '\b7656119[0-9]{10}\b'
           )
           $files = git ls-files -- '*.cs' '*.cmd' '*.md' '*.manifest' '*.json' '*.yml' '*.yaml' '*.ps1'
-          $matches = $files | Select-String -Pattern $patterns
+          $matches = Select-String -Path $files -Pattern $patterns
           if ($matches) {
             $matches | ForEach-Object { Write-Error ("Private-material pattern in {0}:{1}" -f $_.Path, $_.LineNumber) }
             exit 1

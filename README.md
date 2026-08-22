@@ -1,14 +1,15 @@
-# Schedule I Control Center V2.1
+# Schedule I Control Center V2.2
 
 Schedule I Control Center is a Windows companion application for reviewed live
 controls and guarded offline save tools, presented in the Intelligence Database
 visual identity.
 
-V2.1 combines the redesigned control-center interface, clearer workspace
+V2.2 combines the redesigned control-center interface, clearer workspace
 navigation, the Intelligence Database startup sequence, expanded diagnostics,
-one-click attach-and-launch packaging, and guarded GitHub Release updates.
+one-click attach-and-launch packaging, guarded GitHub Release updates, and
+configurable inventory paging that remains available across in-game interfaces.
 
-> Read [RELEASE_NOTES_V2.1.md](RELEASE_NOTES_V2.1.md) for the complete V2.1 summary.
+> Read [RELEASE_NOTES_V2.2.md](RELEASE_NOTES_V2.2.md) for the complete V2.2 summary.
 
 The complete Intelligence Database source for the launcher, graphical
 application, command-line application, live bridge, protocol, and regression
@@ -17,7 +18,7 @@ tests is published under the [MIT licence](LICENSE) in
 
 ## Install and launch
 
-1. Download and extract the V2.1 package outside the Schedule I installation.
+1. Download and extract the V2.2 package outside the Schedule I installation.
 2. Run the root `ScheduleIControlCenter.exe`.
 3. Confirm the detected Schedule I folder when prompted.
 4. The launcher attaches the packaged runtime and opens the Control Center.
@@ -28,13 +29,13 @@ The root launcher does not require elevation, modify saves, delete files, or
 contact a network service. It copies only the packaged runtime into the
 confirmed game folder and records an install summary for troubleshooting.
 
-## V2.1 workspaces
+## V2.2 workspaces
 
 - **Overview** — readiness, recommended workspaces, and ordered command logs.
 - **Market intelligence** — fair-value synchronization, sell-price and deal
   limits, and customer allowances.
-- **Player & inventory** — inventory capacity, virtual hotbar pages, movement
-  speed, preview, apply, and verification.
+- **Player & inventory** — inventory capacity, configurable page-swap hotkey,
+  virtual hotbar pages, movement speed, preview, apply, and verification.
 - **Business operations** — laundering limits and reviewed property controls.
 - **Drug effects** — supported product and effect workflows.
 - **Save & safety** — backup, validation, console enablement, and protected
@@ -60,7 +61,7 @@ apply creates a full backup and validates the affected JSON before replacement.
 The local bridge is same-user, one-client, allowlisted, and versioned; it does
 not expose TCP/HTTP access or arbitrary command execution.
 
-V2.1 keeps deal totals and product unit prices as separate controls. Eligible
+V2.2 keeps deal totals and product unit prices as separate controls. Eligible
 solo-host workflows can raise the reviewed vanilla bounds through the exact
 technical maximum of `$16,777,215`, with preview and verification gates.
 
@@ -109,8 +110,8 @@ release must use a newer semantic version tag for installed copies to detect it.
 
 ## Release identity
 
-- Control Center: **V2.1** (`2.1.0.0`)
-- Bridge: **v1.1.0**
+- Control Center: **V2.2** (`2.2.0.0`)
+- Bridge: **v1.3.0**
 - Reviewed Schedule I build: **0.4.6f13**
 
 This project is an independent utility and is not affiliated with the Schedule

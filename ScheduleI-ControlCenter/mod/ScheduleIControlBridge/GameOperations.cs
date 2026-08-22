@@ -18,7 +18,7 @@ namespace ScheduleIControlBridge
 {
     internal sealed class GameOperations
     {
-        public const string ModVersion = "1.2.0";
+        public const string ModVersion = "1.3.0";
         public const string ExpectedGameVersion = "0.4.6f13";
         public const string ExpectedGameBuild = "24705572";
         private const double PriceTolerance = 0.001;
@@ -1706,10 +1706,13 @@ namespace ScheduleIControlBridge
 
             int inventoryMode = request.Arguments.Value<int?>("inventoryMode") ?? 0;
             float speedMultiplier = request.Arguments.Value<float?>("speedMultiplier") ?? float.NaN;
+            string swapHotkey = request.Arguments.Value<string>("swapHotkey") ?? string.Empty;
             if (inventoryMode < 1 || inventoryMode > 4)
                 return Fail(request, "invalid_args", "inventoryMode must be 1, 2, 3, or 4 (on-demand pages, capped at 8 pages).");
             if (float.IsNaN(speedMultiplier) || float.IsInfinity(speedMultiplier) || speedMultiplier < 0.1f || speedMultiplier > 10f)
                 return Fail(request, "invalid_args", "speedMultiplier must be finite and between 0.1 and 10.0.");
+            if (!InventoryPagingModel.TryNormalizeSwapHotkey(swapHotkey, out string normalizedSwapHotkey))
+                return Fail(request, "invalid_args", "swapHotkey is not a supported keyboard key.");
 
             PlayerSettingsSnapshot current = PlayerRuntimeSettings.ReadSnapshot();
             PlayerSettingsPreview preview = new PlayerSettingsPreview
@@ -1722,6 +1725,8 @@ namespace ScheduleIControlBridge
                 NewInventoryMode = inventoryMode,
                 OldSpeedMultiplier = current.ConfiguredSpeedMultiplier,
                 NewSpeedMultiplier = speedMultiplier,
+                OldSwapHotkey = current.ConfiguredSwapHotkey,
+                NewSwapHotkey = normalizedSwapHotkey,
                 OldInventorySlotCount = current.InventorySlotCount,
                 NewConfiguredPageCount = InventoryPagingModel.ConfiguredPageCountForMode(inventoryMode),
                 NewAllocatedPageCount = inventoryMode == 4
@@ -1784,17 +1789,18 @@ namespace ScheduleIControlBridge
                 return Fail(request, "mutation_not_ready", gate);
             PlayerSettingsSnapshot current = PlayerRuntimeSettings.ReadSnapshot();
             if (current.ConfiguredInventoryMode != preview.OldInventoryMode
-                || Math.Abs(current.ConfiguredSpeedMultiplier - preview.OldSpeedMultiplier) > 0.0001f)
+                || Math.Abs(current.ConfiguredSpeedMultiplier - preview.OldSpeedMultiplier) > 0.0001f
+                || !string.Equals(current.ConfiguredSwapHotkey, preview.OldSwapHotkey, StringComparison.OrdinalIgnoreCase))
                 return Fail(request, "state_changed", "Player settings changed after the preview; refresh and preview again.");
 
             if (request.DryRun)
                 return Ok(request, "Player settings preconditions passed; no change was made because dryRun is true.", preview.ToJson());
 
-            if (!PlayerRuntimeSettings.ApplySettings(preview.NewInventoryMode, preview.NewSpeedMultiplier, out string error))
+            if (!PlayerRuntimeSettings.ApplySettings(preview.NewInventoryMode, preview.NewSpeedMultiplier, preview.NewSwapHotkey, out string error))
                 return Fail(request, "player_settings_apply_failed", error);
 
             revision++;
-            audit(string.Format(CultureInfo.InvariantCulture, "op=player.settings.applyPreview previewId={0} revision={1} inventoryMode={2} speedMultiplier={3:0.###}", previewId, revision, preview.NewInventoryMode, preview.NewSpeedMultiplier));
+            audit(string.Format(CultureInfo.InvariantCulture, "op=player.settings.applyPreview previewId={0} revision={1} inventoryMode={2} speedMultiplier={3:0.###} swapHotkey={4}", previewId, revision, preview.NewInventoryMode, preview.NewSpeedMultiplier, preview.NewSwapHotkey));
             PlayerSettingsSnapshot applied = PlayerRuntimeSettings.ReadSnapshot();
             JObject data = applied.ToJson();
             data["configRevision"] = PlayerRuntimeSettings.ConfigRevision;
@@ -3195,6 +3201,8 @@ namespace ScheduleIControlBridge
         public int NewInventoryMode;
         public float OldSpeedMultiplier;
         public float NewSpeedMultiplier;
+        public string OldSwapHotkey;
+        public string NewSwapHotkey;
         public int OldInventorySlotCount;
         public int NewInventorySlotCount;
         public int NewConfiguredPageCount;
@@ -3215,6 +3223,8 @@ namespace ScheduleIControlBridge
                 ["newInventoryMode"] = NewInventoryMode,
                 ["oldSpeedMultiplier"] = OldSpeedMultiplier,
                 ["newSpeedMultiplier"] = NewSpeedMultiplier,
+                ["oldSwapHotkey"] = OldSwapHotkey ?? InventoryPagingModel.DefaultSwapHotkey,
+                ["newSwapHotkey"] = NewSwapHotkey ?? InventoryPagingModel.DefaultSwapHotkey,
                 ["oldInventorySlotCount"] = OldInventorySlotCount,
                 ["newInventorySlotCount"] = NewInventorySlotCount,
                 ["newConfiguredPageCount"] = NewConfiguredPageCount,
